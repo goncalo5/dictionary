@@ -106,8 +106,10 @@ class Run(object):
     def run(self):
         if self.args.verbose:
             print self.dict_of_all_words
-        sorted(self.dict_of_all_words)
-        lower_points = sorted(self.dict_of_all_words)[0:self.number_of_words_sorted]
+        # select the first n (random) lower points
+        n = random.randrange(len(self.dict_of_all_words)) + 1  # linear
+        n2 = random.randrange(n) + 1 # Second-degree equation
+        lower_points = sorted(self.dict_of_all_words)[0:n2]
         if self.args.verbose:
             print lower_points
         word_points = random.choice(lower_points)
@@ -123,24 +125,31 @@ class Run(object):
             print word[1][1::]
         else:
             print word[1]
-        check = raw_input("right? [y]es or [n]o [a]dd [q]uit  ")
-        if check in ["y", "yes"]:
+        while True:
             if self.args.verbose:
-                print "you answered yes"
-                print type(word_points)
-            word_points = word_points * self.increase_rate
-        elif check in ["n", "no", "not"]:
+                print "while True"
+            check = raw_input("right? [y]es or [n]o [a]dd [q]uit  ")
+            if check in ["y", "yes"]:
+                if self.args.verbose:
+                    print "you answered yes"
+                    print type(word_points)
+                word_points = word_points * self.increase_rate
+            elif check in ["n", "no", "not"]:
+                if self.args.verbose:
+                    print "you answered no"
+                word_points = max(word_points / self.decreased_rate, 1.0)
+            elif check in ["a", "add"]:
+                if self.args.verbose:
+                    print "you answered add"
+                self.add_new_word()
+            elif check in ["q", "quit"]:
+                return
+            else:
+                print "please select y (yes) or n (no) if you got the answer right, or q (quit)"
+                continue
+            break
             if self.args.verbose:
-                print "you answered no"
-            word_points = max(word_points / self.decreased_rate, 1.0)
-        elif check in ["a", "add"]:
-            if self.args.verbose:
-                print "you answered add"
-            self.add_new_word()
-        elif check in ["q", "quit"]:
-            return
-        else:
-            print "please select y (yes) or n (no) if you got the answer right, or e (exit)"
+                print "while True end"
         print word_points
         self.check_if_the_points_exist(word_points, word)
         if self.args.verbose:
