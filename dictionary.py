@@ -23,9 +23,9 @@ class Run(object):
         self.number_of_words_sorted = 10
 
         self.dict_of_all_words = {}
-        self.words_score = 50
-        self.down4right_words = 1
-        self.up4wrong_words = 5
+        self.words_score = 500  # 5-degree equation (500/100)
+        self.down4right_words = 5
+        self.up4wrong_words = 50
         # initial n-degree equation
         # (0 = wardest(uniform), 1 = linear, 2 = 2-degree ... inf = easiest(always first word))
 
@@ -156,13 +156,10 @@ class Run(object):
 
     def clear_screen(self):
         if not self.args.verbose:
-            try:
-                os.system("clear")  # unix like
-            except:
-                try:
-                    os.system("cls")  # windows
-                except:
-                    pass  # others
+            if os.name == "nt":
+                os.system("cls")  # windows
+            else:
+                os.system("clear")
 
     def options(self):
         while True:
@@ -207,7 +204,7 @@ class Run(object):
             print self.dict_of_all_words
         # select the first n (random) lower points
         n = len(self.dict_of_all_words)
-        self.degree = int(self.words_score / 10)
+        self.degree = int(self.words_score / 100)
         if self.args.verbose:
             print "degree: ", self.degree
         for i in xrange(self.degree):
