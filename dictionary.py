@@ -43,7 +43,7 @@ class Run(object):
         except IOError:
             if self.args.verbose:
                 print "can't open the file, need to create new one"
-                print self.args.input_file
+                print "input_file: ", self.args.input_file
             if self.args.input_file:
                 self.open_file_txt_and_create_new_file_with_points()
             else:
@@ -135,9 +135,11 @@ class Run(object):
 
     def add_new_word(self):
         english = raw_input("which word you wanna add?  ")
+        english = english.decode(sys.stdin.encoding)
         # check if that word doesn't already exist
         if self.check_if_the_word_exist(english) is None:
             portuguese = raw_input("what is the solution for that word?  ")
+            portuguese = portuguese.decode(sys.stdin.encoding)
             if portuguese == "q":  # quit
                 return
             word = [english, portuguese]
@@ -218,7 +220,9 @@ class Run(object):
         word = self.dict_of_all_words[self.word_points]
         self.dict_of_all_words.pop(self.word_points)
         self.clear_screen()
-        print "{} ({})".format(word[0], self.word_points)
+        print word
+        print "%s  (%s)" % (word[0], self.word_points)
+        # print "{} ({})".format(word[0], self.word_points)
         raw_input()
         if word[1][0] == " ":
             print word[1][1::]
