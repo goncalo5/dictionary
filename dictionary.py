@@ -25,9 +25,10 @@ class Run(object):
         self.dict_of_all_words = {}
         self.words_score = 500  # 5-degree equation (500/100)
         self.down4right_words = 5
-        self.up4wrong_words = 50
+        self.up4wrong_words = 35
         # initial n-degree equation
         # (0 = wardest(uniform), 1 = linear, 2 = 2-degree ... inf = easiest(always first word))
+        self.word_points = self.last_word_points = None
 
         self.try_open_file()
         self.open_file()
@@ -52,9 +53,10 @@ class Run(object):
                 print self.dict_of_all_words
 
     def create_a_new_file_from_scrath(self):
-        if self.args.verbose:
-            print "\ncreate a new file from scrath"
-        self.add_new_word()
+        print "\ncreate a new file from scrath"
+        while len(self.dict_of_all_words) < 2:
+            print "\nplease insert at least 2 word\n\n"
+            self.input_new_word()
         self.save_file()
 
     def open_file(self):
@@ -99,29 +101,29 @@ class Run(object):
         self.f = open(self.file_name, "w")
         json.dump(self.dict_of_all_words, self.f)
 
-    def check_if_the_points_exist(self, word_points, word):
-        if self.args.verbose:
-            print "check_if_the_points_exist"
-            print word_points, word
-            print self.dict_of_all_words
-        while True:
-            if self.args.verbose:
-                print "while true"
-            # To avoid deleting an existing word
-            try:
-                self.dict_of_all_words[word_points]
-                if self.args.verbose:
-                    print "there are other word with the same key"
-                    print self.dict_of_all_words[word_points]
-                word_points += 0.0001
-            except KeyError:
-                if self.args.verbose:
-                    print word_points, word
-                    print "there are no other word with the same key"
-                self.dict_of_all_words[word_points] = word
-                break
+    def check_if_the_points_exist(self, word_points, new=False, last=False):
+        if word_points == self.word_points:
+            if new:
+                return False
+            return True
+        try:
+            if word_points == self.last_word_points:
+                if last:
+                    return False
+                return True
+        except AttributeError:
+            pass
+        if word_points in self.dict_of_all_words:
+            return True
+        return False
+
+    def create_valide_points(self, word_points, new=False, last=False):
+        while self.check_if_the_points_exist(word_points, new=new, last=new):
+            word_points += 0.000001
+        return word_points
 
     def check_if_the_word_exist(self, word):
+        # return points if the word exist, and False otherwise
         if self.args.verbose:
             print "check if that word already exist", word
         for points in self.dict_of_all_words:
@@ -133,28 +135,39 @@ class Run(object):
         if self.args.verbose:
             print "that word doesn't exist, will return None"
 
-    def add_new_word(self):
-        english = raw_input("which word you wanna add?  ")
-        english = english.decode(sys.stdin.encoding)
-        # check if that word doesn't already exist
-        if self.check_if_the_word_exist(english) is None:
-            portuguese = raw_input("what is the solution for that word?  ")
-            portuguese = portuguese.decode(sys.stdin.encoding)
-            if portuguese == "q":  # quit
-                return
-            word = [english, portuguese]
-            self.check_if_the_points_exist(word_points=1.0, word=word)
-        else:
-            self.add_new_word()
+    def add_new_word(self, new_word, new_word_points, new=False, last=False):
+        if self.args.verbose:
+            print "\nadd_new_word"
+            print self.dict_of_all_words
+            print "new_word_points ", new_word_points
+            print "new_word ", new_word
 
-    def delete_word(self):
-        english = raw_input("which word you wanna delete?  ")
+        new_word_points = self.create_valide_points(word_points=1.0, new=new, last=last)
+        self.dict_of_all_words[new_word_points] = new_word
+
+    def input_new_word(self):
+        original_word = raw_input("which word you wanna add?  ")
+        original_word = original_word.decode(sys.stdin.encoding)
         # check if that word doesn't already exist
-        points = self.check_if_the_word_exist(english)
+        if self.check_if_the_word_exist(original_word) is None:
+            translation = raw_input("what is the solution for that word?  ")
+            translation = translation.decode(sys.stdin.encoding)
+            if translation == "q":  # quit
+                return
+            self.add_new_word(new_word=[original_word, translation], new_word_points=1.0)
+        else:
+            self.input_new_word()
+
+    def delete_word(self, original_word):
+        points = self.check_if_the_word_exist(original_word)
         if points is not None:
             if self.args.verbose:
                 print self.dict_of_all_words[points], " deleted"
             del self.dict_of_all_words[points]
+
+    def input_word2delete(self):
+        original_word = raw_input("which word you wanna delete?  ")
+        self.delete_word(original_word)
 
     def clear_screen(self):
         if not self.args.verbose:
@@ -171,25 +184,39 @@ class Run(object):
             for option in options:
                 print "[{}]{} ".format(option[0], option[1::]),
             check = raw_input("  ")
+
             if check in ["y", "yes"]:
-                if self.args.verbose:
-                    print "you answered yes"
-                    print type(self.word_points)
+                last = self.word_points
                 self.word_points = self.word_points * self.increase_rate
                 self.words_score = max(self.words_score - self.down4right_words, 0)
-            elif check in ["n", "no", "not"]:
+                self.word_points = self.word_points + random.random() / 100
+                self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
+
                 if self.args.verbose:
-                    print "you answered no"
+                    print "you answered yes"
+                    print "self.word_points ", self.word_points
+                    print "self.words_score", self.words_score
+
+            elif check in ["n", "no", "not"]:
+                last = self.word_points
                 self.word_points = max(self.word_points / self.decreased_rate, 1.0)
                 self.words_score += self.up4wrong_words
+                self.word_points = self.word_points + random.random() / 100
+                self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
+
+                if self.args.verbose:
+                    print "you answered no"
+                    print "self.word_points ", self.word_points
+                    print "self.words_score", self.words_score
+
             elif check in ["a", "add"]:
                 if self.args.verbose:
                     print "you answered add"
-                self.add_new_word()
+                self.input_new_word()
             elif check in ["d", "delete"]:
                 if self.args.verbose:
                     print "you answered delete"
-                self.delete_word()
+                self.input_word2delete()
             elif check in ["q", "quit"]:
                 if self.args.verbose:
                     print "you answered quit"
@@ -201,38 +228,76 @@ class Run(object):
             if self.args.verbose:
                 print "while True end"
 
-    def run(self):
+    def ensure_that_the_word_does_not_appear_twice_repeated(self):
         if self.args.verbose:
-            print self.dict_of_all_words
+            print "\nensure_that_the_word_does_not_appear_twice_repeated"
+
+        # To ensure that the word does not appear twice repeated
+        if self.word_points:
+            # save the word to add later
+            self.last_word_points = self.word_points
+            self.last_word = self.dict_of_all_words[self.last_word_points]
+            # remove the word from dict
+            # self.dict_of_all_words.pop(self.last_word_points)
+
+    def calc_word_points(self):
         # select the first n (random) lower points
         n = len(self.dict_of_all_words)
         self.degree = int(self.words_score / 100)
-        if self.args.verbose:
-            print "degree: ", self.degree
         for i in xrange(self.degree):
             n = random.randrange(n) + 1
         lower_points = sorted(self.dict_of_all_words)[0:n]
-        if self.args.verbose:
-            print lower_points
         self.word_points = random.choice(lower_points)
+        if self.word_points == self.last_word_points:
+            self.calc_word_points()
+
         if self.args.verbose:
+            print "calc_word_points"
+            print "degree: ", self.degree
+            print lower_points
             print self.word_points
-        word = self.dict_of_all_words[self.word_points]
-        self.dict_of_all_words.pop(self.word_points)
-        self.clear_screen()
-        print word
-        print "%s  (%s)" % (word[0], self.word_points)
-        # print "{} ({})".format(word[0], self.word_points)
-        raw_input()
-        if word[1][0] == " ":
-            print word[1][1::]
-        else:
-            print word[1]
-        self.options()
-        print self.word_points
-        self.check_if_the_points_exist(self.word_points, word)
+
+    def choose_a_word(self):
         if self.args.verbose:
+            print "\nchoose_a_word"
+
+        # self.ensure_that_the_word_does_not_appear_twice_repeated()
+        self.calc_word_points()
+        self.chosen_word = self.dict_of_all_words[self.word_points]
+        # self.dict_of_all_words.pop(self.word_points)
+
+    def print_word(self):
+        if self.args.verbose:
+            print "\nprint_word"
+
+        print "%s  (%s)" % (self.chosen_word[0], self.word_points)
+
+    def print_solution(self):
+        if self.args.verbose:
+            print "\nprint_solution"
+
+        raw_input()
+        if self.chosen_word[1][0] == " ":
+            print self.chosen_word[1][1::]
+        else:
+            print self.chosen_word[1]
+
+    def run(self):
+        if self.args.verbose:
+            print "\n\nrun"
+
+        self.choose_a_word()
+        self.clear_screen()
+        self.print_word()
+        self.print_solution()
+        self.options()
+        self.last_word_points = self.word_points
+
+        if self.args.verbose:
+            print "chosen_word ", self.chosen_word
+            print "word_points ", self.word_points
             print self.dict_of_all_words
+
         self.save_file()
         self.f.close()
         self.run()
