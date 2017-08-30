@@ -7,8 +7,13 @@ import json
 
 class Run(object):
     def __init__(self):
-        # file_path_and_name = "/Users/goncalo/Documents/Notes/dicionario.txt"
+        self.initiate_settings()
+        self.try_open_file()
+        self.open_file()
+        self.run()
 
+    def initiate_settings(self):
+        # file_path_and_name = "/Users/goncalo/Documents/Notes/dicionario.txt"
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument("-v", "--verbose", action='store_true')
         self.parser.add_argument('-i', '--input_file', type=str, nargs=1)
@@ -30,10 +35,7 @@ class Run(object):
         # (0 = wardest(uniform), 1 = linear, 2 = 2-degree ... inf = easiest(always first word))
         self.word_points = self.last_word_points = None
 
-        self.try_open_file()
-        self.open_file()
-        self.run()
-
+    # File
     def try_open_file(self):
         try:
             if self.args.verbose:
@@ -56,7 +58,7 @@ class Run(object):
         print "\ncreate a new file from scrath"
         while len(self.dict_of_all_words) < 2:
             print "\nplease insert at least 2 word\n\n"
-            self.input_new_word()
+            self.option_a()  # option add
         self.save_file()
 
     def open_file(self):
@@ -86,6 +88,10 @@ class Run(object):
             line = line.split("  ")
             if line == ["\n"]:
                 continue
+            if line[-1][0] == " ":
+                line = [line[0], line[-1]][1::]
+            else:
+                line = [line[0], line[-1]]
             line = [line[0], line[-1]]
             # print line,
             self.dict_of_all_words[i] = line
@@ -101,24 +107,13 @@ class Run(object):
         self.f = open(self.file_name, "w")
         json.dump(self.dict_of_all_words, self.f)
 
-    def check_if_the_points_exist(self, word_points, new=False, last=False):
-        if word_points == self.word_points:
-            if new:
-                return False
-            return True
-        try:
-            if word_points == self.last_word_points:
-                if last:
-                    return False
-                return True
-        except AttributeError:
-            pass
+    def check_if_the_points_exist(self, word_points):
         if word_points in self.dict_of_all_words:
             return True
         return False
 
-    def create_valide_points(self, word_points, new=False, last=False):
-        while self.check_if_the_points_exist(word_points, new=new, last=new):
+    def create_valide_points(self, word_points):
+        while self.check_if_the_points_exist(word_points):
             word_points += 0.000001
         return word_points
 
@@ -130,33 +125,21 @@ class Run(object):
             if self.args.verbose:
                 print points, self.dict_of_all_words[points]
             if unicode(word) == self.dict_of_all_words[points][0]:
-                print "that word already exist"
+                if self.args.verbose:
+                    print "\n\nthat word already exist"
                 return points
         if self.args.verbose:
             print "that word doesn't exist, will return None"
 
-    def add_new_word(self, new_word, new_word_points, new=False, last=False):
+    def add_new_word(self, new_word, new_word_points):
         if self.args.verbose:
             print "\nadd_new_word"
             print self.dict_of_all_words
             print "new_word_points ", new_word_points
             print "new_word ", new_word
 
-        new_word_points = self.create_valide_points(word_points=1.0, new=new, last=last)
+        new_word_points = self.create_valide_points(word_points=1.0)
         self.dict_of_all_words[new_word_points] = new_word
-
-    def input_new_word(self):
-        original_word = raw_input("which word you wanna add?  ")
-        original_word = original_word.decode(sys.stdin.encoding)
-        # check if that word doesn't already exist
-        if self.check_if_the_word_exist(original_word) is None:
-            translation = raw_input("what is the solution for that word?  ")
-            translation = translation.decode(sys.stdin.encoding)
-            if translation == "q":  # quit
-                return
-            self.add_new_word(new_word=[original_word, translation], new_word_points=1.0)
-        else:
-            self.input_new_word()
 
     def delete_word(self, original_word):
         points = self.check_if_the_word_exist(original_word)
@@ -165,10 +148,6 @@ class Run(object):
                 print self.dict_of_all_words[points], " deleted"
             del self.dict_of_all_words[points]
 
-    def input_word2delete(self):
-        original_word = raw_input("which word you wanna delete?  ")
-        self.delete_word(original_word)
-
     def clear_screen(self):
         if not self.args.verbose:
             if os.name == "nt":
@@ -176,69 +155,92 @@ class Run(object):
             else:
                 os.system("clear")
 
-    def options(self):
+    # Options
+    def option_y(self):
+        last = self.word_points
+        self.word_points = self.word_points * self.increase_rate
+        self.words_score = max(self.words_score - self.down4right_words, 0)
+        self.word_points = self.word_points + random.random() / 100
+        self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
+
+        if self.args.verbose:
+            print "you answered yes"
+            print "self.word_points ", self.word_points
+            print "self.words_score", self.words_score
+
+    def option_n(self):
+        last = self.word_points
+        self.word_points = max(self.word_points / self.decreased_rate, 1.0)
+        self.words_score += self.up4wrong_words
+        self.word_points = self.word_points + random.random() / 100
+        self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
+
+        if self.args.verbose:
+            print "you answered no"
+            print "self.word_points ", self.word_points
+            print "self.words_score", self.words_score
+
+    def option_a(self):
+        if self.args.verbose:
+            print "you answered add"
+        original_word = raw_input("\n\nwhich word you wanna add?  ").decode(sys.stdin.encoding)
+        # check if that word doesn't already exist and give the points in case of existing
+        original_word_exist = self.check_if_the_word_exist(original_word)
+        if not original_word_exist:
+            translation = raw_input("what is the solution for that word?  ").decode(sys.stdin.encoding)
+            if translation == "q":  # quit
+                return
+            self.add_new_word(new_word=[original_word, translation], new_word_points=1.0)
+        else:
+            translation = self.dict_of_all_words[original_word_exist][1]
+            print "\nthe word {} already exists, with the translation: {}".format(original_word, translation)
+            self.input_new_word()
+
+    def option_m(self):
+        if self.args.verbose:
+            print "you answered modify"
+        word2modify = raw_input("\n\nwhich word you wanna modify the solution?  ")
+        word2modify_points = self.check_if_the_word_exist(word2modify)
+        if word2modify_points:
+            translation = self.dict_of_all_words[word2modify_points][1]
+            print "\n\nthe word %s already exists, with the translation: %s" % (word2modify, translation)
+            translation = raw_input("\nwhat is the new solution for that word?  ").decode(sys.stdin.encoding)
+            self.dict_of_all_words[word2modify_points][1] = translation
+        else:
+            print "that word don't exist, please insert a word that already exist or add new one"
+            self.print_menu()
+
+    def option_d(self):
+        if self.args.verbose:
+            print "you answered delete"
+        original_word = raw_input("which word you wanna delete?  ")
+        self.delete_word(original_word)
+
+    def option_q(self):
+        if self.args.verbose:
+            print "you answered quit"
+        sys.exit(0)
+
+    def print_menu(self):
         while True:
             if self.args.verbose:
                 print "while True"
-            options = ["yes", "no", "add", "delete", "quit"]
+            options = ["yes", "no", "add", "modify", "delete", "quit"]
+            menu = "\n"
             for option in options:
-                print "[{}]{} ".format(option[0], option[1::]),
-            check = raw_input("  ")
-
-            if check in ["y", "yes"]:
-                last = self.word_points
-                self.word_points = self.word_points * self.increase_rate
-                self.words_score = max(self.words_score - self.down4right_words, 0)
-                self.word_points = self.word_points + random.random() / 100
-                self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
-
-                if self.args.verbose:
-                    print "you answered yes"
-                    print "self.word_points ", self.word_points
-                    print "self.words_score", self.words_score
-
-            elif check in ["n", "no", "not"]:
-                last = self.word_points
-                self.word_points = max(self.word_points / self.decreased_rate, 1.0)
-                self.words_score += self.up4wrong_words
-                self.word_points = self.word_points + random.random() / 100
-                self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
-
-                if self.args.verbose:
-                    print "you answered no"
-                    print "self.word_points ", self.word_points
-                    print "self.words_score", self.words_score
-
-            elif check in ["a", "add"]:
-                if self.args.verbose:
-                    print "you answered add"
-                self.input_new_word()
-            elif check in ["d", "delete"]:
-                if self.args.verbose:
-                    print "you answered delete"
-                self.input_word2delete()
-            elif check in ["q", "quit"]:
-                if self.args.verbose:
-                    print "you answered quit"
-                sys.exit(0)
-            else:
-                print "please select y (yes) or n (no) if you got the answer right, or q (quit)"
+                menu += "[{}]{} ".format(option[0], option[1::])
+            print menu,
+            choise = raw_input("  ")
+            erro_msg = "\n\nI don't understand your answer, please select one of the below posiblilities"
+            if len(choise) != 1 and choise not in options:
+                print erro_msg
+                continue
+            try:
+                getattr(self, "option_" + choise[0])()
+            except AttributeError:
+                print erro_msg
                 continue
             break
-            if self.args.verbose:
-                print "while True end"
-
-    def ensure_that_the_word_does_not_appear_twice_repeated(self):
-        if self.args.verbose:
-            print "\nensure_that_the_word_does_not_appear_twice_repeated"
-
-        # To ensure that the word does not appear twice repeated
-        if self.word_points:
-            # save the word to add later
-            self.last_word_points = self.word_points
-            self.last_word = self.dict_of_all_words[self.last_word_points]
-            # remove the word from dict
-            # self.dict_of_all_words.pop(self.last_word_points)
 
     def calc_word_points(self):
         # select the first n (random) lower points
@@ -261,26 +263,16 @@ class Run(object):
         if self.args.verbose:
             print "\nchoose_a_word"
 
-        # self.ensure_that_the_word_does_not_appear_twice_repeated()
         self.calc_word_points()
         self.chosen_word = self.dict_of_all_words[self.word_points]
-        # self.dict_of_all_words.pop(self.word_points)
 
-    def print_word(self):
+    def print_word_and_solution(self):
         if self.args.verbose:
-            print "\nprint_word"
+            print "\print_word_and_solution"
 
         print "%s  (%s)" % (self.chosen_word[0], self.word_points)
-
-    def print_solution(self):
-        if self.args.verbose:
-            print "\nprint_solution"
-
         raw_input()
-        if self.chosen_word[1][0] == " ":
-            print self.chosen_word[1][1::]
-        else:
-            print self.chosen_word[1]
+        print self.chosen_word[1]
 
     def run(self):
         if self.args.verbose:
@@ -288,9 +280,8 @@ class Run(object):
 
         self.choose_a_word()
         self.clear_screen()
-        self.print_word()
-        self.print_solution()
-        self.options()
+        self.print_word_and_solution()
+        self.print_menu()
         self.last_word_points = self.word_points
 
         if self.args.verbose:
