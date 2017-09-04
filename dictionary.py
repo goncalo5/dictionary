@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import time
 import random
 import json
 
@@ -29,8 +30,10 @@ class Run(object):
 
         self.dict_of_all_words = {}
         self.words_score = 500  # 5-degree equation (500/100)
-        self.down4right_words = 5
-        self.up4wrong_words = 35
+        self.down4right_words = 50  # self.words_score will be divided by
+        # increment = self.up4wrong_words_a / ( self.word_points + self.up4wrong_words_b)
+        self.up4wrong_words_a = 4000.
+        self.up4wrong_words_b = 20.
         # initial n-degree equation
         # (0 = wardest(uniform), 1 = linear, 2 = 2-degree ... inf = easiest(always first word))
         self.word_points = self.last_word_points = None
@@ -114,7 +117,7 @@ class Run(object):
 
     def create_valide_points(self, word_points):
         while self.check_if_the_points_exist(word_points):
-            word_points += 0.000001
+            word_points += random.random() / 1000
         return word_points
 
     def check_if_the_word_exist(self, word):
@@ -157,10 +160,13 @@ class Run(object):
 
     # Options
     def option_y(self):
+        self.words_score -= self.words_score / self.down4right_words
+
         last = self.word_points
         self.word_points = self.word_points * self.increase_rate
-        self.words_score = max(self.words_score - self.down4right_words, 0)
-        self.word_points = self.word_points + random.random() / 100
+        # to ensure there is no overlap of words
+        while self.word_points in self.dict_of_all_words:
+            self.word_points += random.random() / 1000
         self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
 
         if self.args.verbose:
@@ -169,16 +175,24 @@ class Run(object):
             print "self.words_score", self.words_score
 
     def option_n(self):
+        self.words_score +=\
+            float(self.up4wrong_words_a) / (self.words_score + self.up4wrong_words_b)
+
         last = self.word_points
         self.word_points = max(self.word_points / self.decreased_rate, 1.0)
-        self.words_score += self.up4wrong_words
-        self.word_points = self.word_points + random.random() / 100
+        # to ensure there is no overlap of words
+        while self.word_points in self.dict_of_all_words:
+            self.word_points += random.random() / 1000
         self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
 
         if self.args.verbose:
             print "you answered no"
             print "self.word_points ", self.word_points
             print "self.words_score", self.words_score
+            print "self.up4wrong_words_a", self.up4wrong_words_a
+            print "self.up4wrong_words_b", self.up4wrong_words_b
+            print "self.up4wrong_words_a / (self.words_score + self.up4wrong_words_b)"
+            print self.up4wrong_words_a / (self.words_score + self.up4wrong_words_b)
 
     def option_a(self):
         if self.args.verbose:
@@ -193,8 +207,8 @@ class Run(object):
             self.add_new_word(new_word=[original_word, translation], new_word_points=1.0)
         else:
             translation = self.dict_of_all_words[original_word_exist][1]
-            print "\nthe word {} already exists, with the translation: {}".format(original_word, translation)
-            self.input_new_word()
+            print "\nthe word %s already exists, with the translation: %s" % (original_word, translation)
+            time.sleep(5)
 
     def option_m(self):
         if self.args.verbose:
@@ -230,13 +244,19 @@ class Run(object):
             for option in options:
                 menu += "[{}]{} ".format(option[0], option[1::])
             print menu,
-            choise = raw_input("  ")
+            choice = raw_input("  ").strip()
+            if self.args.verbose:
+                print "choice: ", choice
+                print "len(choice) != 1 ", len(choice) != 1
+                print "choice not in options", choice not in options
             erro_msg = "\n\nI don't understand your answer, please select one of the below posiblilities"
-            if len(choise) != 1 and choise not in options:
+            if len(choice) != 1 and choice not in options:
                 print erro_msg
                 continue
             try:
-                getattr(self, "option_" + choise[0])()
+                if self.args.verbose:
+                    print '"option_" + choice[0]', "option_" + choice[0]
+                getattr(self, "option_" + choice[0])()
             except AttributeError:
                 print erro_msg
                 continue
@@ -244,14 +264,15 @@ class Run(object):
 
     def calc_word_points(self):
         # select the first n (random) lower points
-        n = len(self.dict_of_all_words)
-        self.degree = int(self.words_score / 100)
-        for i in xrange(self.degree):
-            n = random.randrange(n) + 1
-        lower_points = sorted(self.dict_of_all_words)[0:n]
-        self.word_points = random.choice(lower_points)
-        if self.word_points == self.last_word_points:
-            self.calc_word_points()
+        while True:
+            n = len(self.dict_of_all_words)
+            self.degree = int(self.words_score / 100)
+            for i in xrange(self.degree):
+                n = random.randrange(n) + 1
+            lower_points = sorted(self.dict_of_all_words)[0:n]
+            self.word_points = random.choice(lower_points)
+            if self.word_points != self.last_word_points:
+                break
 
         if self.args.verbose:
             print "calc_word_points"
@@ -270,7 +291,9 @@ class Run(object):
         if self.args.verbose:
             print "\print_word_and_solution"
 
-        print "%s  (%s)" % (self.chosen_word[0], self.word_points)
+        print "%s  (%s points)  words: %s   score: %s"\
+            % (self.chosen_word[0], int(self.word_points),
+                len(self.dict_of_all_words), int(self.words_score))
         raw_input()
         print self.chosen_word[1]
 
@@ -285,6 +308,7 @@ class Run(object):
         self.last_word_points = self.word_points
 
         if self.args.verbose:
+            print self.degree, self.words_score
             print "chosen_word ", self.chosen_word
             print "word_points ", self.word_points
             print self.dict_of_all_words
