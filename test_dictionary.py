@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import unittest
 import dictionary
 
@@ -31,6 +32,10 @@ class TestWizard(unittest.TestCase):
         self.assertGreater(result, 2.)
         result = self.run.create_valide_points(30.26948287757, self.dict_of_all_words)
         self.assertGreater(result, 30.26948287757)
+
+        result = self.run.create_valide_points(30.26948287757, self.dict_of_all_words)
+        result = round(result, 2)
+        self.assertEqual(result, 30.27)
 
     def test_check_if_the_word_exist(self):
         result = self.run.check_if_the_word_exist("hero", self.dict_of_all_words)
@@ -67,6 +72,26 @@ class TestWizard(unittest.TestCase):
         self.run.delete_word(original_word="unknown", dictionary=new_dict)
         self.assertEqual(len(new_dict), len(self.dict_of_all_words))
 
+    def test_calc_word_points(self):
+        result = self.run.calc_word_points(
+            dictionary=self.dict_of_all_words, words_score=200, last_word_points=2.)
+        self.assertNotEqual(result, 2.)
+        self.assertIn(result, self.dict_of_all_words)
+        result = self.run.calc_word_points(
+            dictionary=self.dict_of_all_words, words_score=800, last_word_points=1.)
+        self.assertNotEqual(result, 1.)
+        self.assertIn(result, self.dict_of_all_words)
+        result = self.run.calc_word_points(
+            dictionary=self.dict_of_all_words, words_score=50, last_word_points=30.26948287757)
+        self.assertNotEqual(result, 30.26948287757)
+        self.assertIn(result, self.dict_of_all_words)
+
+    def test_choose_a_word(self):
+        result = self.run.choose_a_word(
+            dictionary=self.dict_of_all_words, words_score=200, last_word_points=1.)
+        self.assertNotEqual(result, (1., ["hello", "ola"]))
+        self.assertIn(result[0], self.dict_of_all_words)
+        self.assertIn(result[1], self.dict_of_all_words.values())
 
 if __name__ == '__main__':
     unittest.main()

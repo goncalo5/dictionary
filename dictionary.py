@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 import sys
 import argparse
@@ -19,7 +20,7 @@ class Run(object):
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument("-v", "--verbose", action='store_true')
         self.parser.add_argument('-i', '--input_file', type=str, nargs=1)
-        self.parser.add_argument('-f', '--filename', type=str, nargs=1, default="dicionario.txt")
+        self.parser.add_argument('-f', '--filename', type=str, nargs=1, default=["dicionario.txt"])
         self.args = self.parser.parse_args()
         if __name__ == '__main__' and self.args.verbose:
             print self.args
@@ -68,6 +69,7 @@ class Run(object):
     def open_file(self):
         if __name__ == '__main__' and self.args.verbose:
             print "\nopen file"
+            print self.file_name
         self.f = open(self.file_name, "r")
         self.dict_of_all_words = json.load(self.f)
         # convert unicode to numbers
@@ -257,7 +259,7 @@ class Run(object):
             for option in options:
                 menu += "[{}]{} ".format(option[0], option[1::])
             print menu,
-            choice = raw_input("  ").strip()
+            choice = raw_input("  ").strip().lower()
             if __name__ == '__main__' and self.args.verbose:
                 print "choice: ", choice
                 print "len(choice) != 1 ", len(choice) != 1
@@ -275,42 +277,56 @@ class Run(object):
                 continue
             break
 
-    def calc_word_points(self, dictionary=None, words_score=None):
+    def calc_word_points(self, dictionary=None, words_score=None, last_word_points=None):
         if not dictionary:
             dictionary = self.dict_of_all_words
         if not words_score:
             words_score = self.words_score
+        if not last_word_points:
+            last_word_points = self.last_word_points
         # select the first n (random) lower points
         while True:
             n = len(dictionary)
             degree = int(words_score / 100)
             for i in xrange(degree):
-                n = random.randrange(n) + 1
+                n = max(random.randrange(n) + 1, 2)
             lower_points = sorted(dictionary)[0:n]
-            self.word_points = random.choice(lower_points)
-            if self.word_points != self.last_word_points:
+            word_points = random.choice(lower_points)
+            if word_points != last_word_points:
                 break
+        return word_points
 
         if __name__ == '__main__' and self.args.verbose:
             print "calc_word_points"
             print "degree: ", degree
             print lower_points
-            print self.word_points
+            print word_points
 
-    def choose_a_word(self):
+    def choose_a_word(self, dictionary=None, words_score=None, last_word_points=None):
         if __name__ == '__main__' and self.args.verbose:
             print "\nchoose_a_word"
 
-        self.calc_word_points()
-        self.chosen_word = self.dict_of_all_words[self.word_points]
+        if not dictionary:
+            dictionary = self.dict_of_all_words
+        if not words_score:
+            words_score = self.words_score
+        if not last_word_points:
+            last_word_points = self.last_word_points
+        word_points = self.calc_word_points(
+            dictionary, words_score, last_word_points)
+        chosen_word = dictionary[word_points]
+        return word_points, chosen_word
 
     def print_word_and_solution(self):
         if __name__ == '__main__' and self.args.verbose:
             print "\print_word_and_solution"
 
-        print "%s  (%s points)  words: %s   score: %s"\
+        # print "%s  (%s points)  words: %s   score: %s"\
+        #     % (self.chosen_word[0], int(self.word_points),
+        #         len(self.dict_of_all_words), int(self.words_score))
+        print "%s  (%s points)  words: %s"\
             % (self.chosen_word[0], int(self.word_points),
-                len(self.dict_of_all_words), int(self.words_score))
+                len(self.dict_of_all_words))
         raw_input()
         print self.chosen_word[1]
 
@@ -319,7 +335,7 @@ class Run(object):
             if __name__ == '__main__' and self.args.verbose:
                 print "\n\nrun"
 
-            self.choose_a_word()
+            self.word_points, self.chosen_word = self.choose_a_word()
             self.clear_screen()
             self.print_word_and_solution()
             self.print_menu()
