@@ -124,7 +124,7 @@ class Run(object):
         if dictionary is None:
             dictionary = self.dict_of_all_words
         while self.check_if_the_points_exist(word_points, dictionary):
-            word_points += random.random() / 1000
+            word_points += 0.0001
         return word_points
 
     def check_if_the_word_exist(self, word, dictionary=None):
