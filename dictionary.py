@@ -23,7 +23,7 @@ class Run(object):
         self.parser.add_argument('-f', '--filename', type=str, nargs=1, default=["dicionario.txt"])
         self.args = self.parser.parse_args()
         if __name__ == '__main__' and self.args.verbose:
-            print self.args
+            print(self.args)
 
         self.file_name = self.args.filename[0]
         self.increase_rate = 1.5
@@ -44,37 +44,37 @@ class Run(object):
     def try_open_file(self):
         try:
             if __name__ == '__main__' and self.args.verbose:
-                print "trying open the file"
+                print("trying open the file")
             self.open_file()
             if __name__ == '__main__' and self.args.verbose:
-                print "file open with sucess"
+                print("file open with sucess")
         except IOError:
             if __name__ == '__main__' and self.args.verbose:
-                print "can't open the file, need to create new one"
-                print "input_file: ", self.args.input_file
+                print("can't open the file, need to create new one")
+                print("input_file: ", self.args.input_file)
             if self.args.input_file:
                 self.open_file_txt_and_create_new_file_with_points()
             else:
                 self.create_a_new_file_from_scrath()
             if __name__ == '__main__' and self.args.verbose:
-                print self.dict_of_all_words
+                print(self.dict_of_all_words)
 
     def create_a_new_file_from_scrath(self):
-        print "\ncreate a new file from scrath"
+        print("\ncreate a new file from scrath")
         while len(self.dict_of_all_words) < 2:
-            print "\nplease insert at least 2 word\n\n"
+            print("\nplease insert at least 2 word\n\n")
             self.option_a()  # option add
         self.save_file()
 
     def open_file(self):
         if __name__ == '__main__' and self.args.verbose:
-            print "\nopen file"
-            print self.file_name
+            print("\nopen file")
+            print(self.file_name)
         self.f = open(self.file_name, "r")
         self.dict_of_all_words = json.load(self.f)
         # convert unicode to numbers
         if __name__ == '__main__' and self.args.verbose:
-            print self.dict_of_all_words
+            print(self.dict_of_all_words)
         for elem in self.dict_of_all_words:
             value = self.dict_of_all_words[elem]
             self.dict_of_all_words.pop(elem)
@@ -85,7 +85,7 @@ class Run(object):
         # format in the existing file: "english_word      translation"
 
         if __name__ == '__main__' and self.args.verbose:
-            print "open_file_txt_and_create_new_file_with_points"
+            print("open_file_txt_and_create_new_file_with_points")
         input_file = open(self.args.input_file, "r")
         output_file = open(self.file_name, "w")
 
@@ -109,7 +109,7 @@ class Run(object):
 
     def save_file(self):
         if __name__ == '__main__' and self.args.verbose:
-            print "saving file"
+            print("saving file")
         self.f = open(self.file_name, "w")
         json.dump(self.dict_of_all_words, self.f)
 
@@ -132,23 +132,23 @@ class Run(object):
         if dictionary is None:
             dictionary = self.dict_of_all_words
         if __name__ == '__main__' and self.args.verbose:
-            print "check if that word already exist", word
+            print("check if that word already exist", word)
         for points in dictionary:
             if __name__ == '__main__' and self.args.verbose:
-                print points, dictionary[points]
-            if unicode(word) == dictionary[points][0]:
+                print(points, dictionary[points])
+            if word == dictionary[points][0]:
                 if __name__ == '__main__' and self.args.verbose:
-                    print "\n\nthat word already exist"
+                    print("\n\nthat word already exist")
                 return points
         if __name__ == '__main__' and self.args.verbose:
-            print "that word doesn't exist, will return None"
+            print("that word doesn't exist, will return None")
 
     def add_new_word(self, new_word, new_word_points, dictionary=None):
         if __name__ == '__main__' and self.args.verbose:
-            print "\nadd_new_word"
-            print self.dict_of_all_words
-            print "new_word_points ", new_word_points
-            print "new_word ", new_word
+            print("\nadd_new_word")
+            print(self.dict_of_all_words)
+            print("new_word_points ", new_word_points)
+            print("new_word ", new_word)
 
         if dictionary is None:
             dictionary = self.dict_of_all_words
@@ -163,7 +163,7 @@ class Run(object):
         points = self.check_if_the_word_exist(original_word, dictionary)
         if points is not None:
             if __name__ == '__main__' and self.args.verbose:
-                print dictionary[points], " deleted"
+                print(dictionary[points], " deleted")
             del dictionary[points]
 
     def clear_screen(self):
@@ -178,102 +178,102 @@ class Run(object):
         self.words_score -= self.words_score / self.down4right_words
 
         last = self.word_points
-        self.word_points = self.word_points * self.increase_rate
+        self.word_points = float(self.word_points) * float(self.increase_rate)
         # to ensure there is no overlap of words
         while self.word_points in self.dict_of_all_words:
             self.word_points += random.random() / 1000
         self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
 
         if __name__ == '__main__' and self.args.verbose:
-            print "you answered yes"
-            print "self.word_points ", self.word_points
-            print "self.words_score", self.words_score
+            print("you answered yes")
+            print("self.word_points ", self.word_points)
+            print("self.words_score", self.words_score)
 
     def option_n(self):
         self.words_score +=\
             float(self.up4wrong_words_a) / (self.words_score + self.up4wrong_words_b)
 
         last = self.word_points
-        self.word_points = max(self.word_points / self.decreased_rate, 1.0)
+        self.word_points = max(float(self.word_points) / float(self.decreased_rate), 1.0)
         # to ensure there is no overlap of words
         while self.word_points in self.dict_of_all_words:
             self.word_points += random.random() / 1000
         self.dict_of_all_words[self.word_points] = self.dict_of_all_words.pop(last)
 
         if __name__ == '__main__' and self.args.verbose:
-            print "you answered no"
-            print "self.word_points ", self.word_points
-            print "self.words_score", self.words_score
-            print "self.up4wrong_words_a", self.up4wrong_words_a
-            print "self.up4wrong_words_b", self.up4wrong_words_b
-            print "self.up4wrong_words_a / (self.words_score + self.up4wrong_words_b)"
-            print self.up4wrong_words_a / (self.words_score + self.up4wrong_words_b)
+            print("you answered no")
+            print("self.word_points ", self.word_points)
+            print("self.words_score", self.words_score)
+            print("self.up4wrong_words_a", self.up4wrong_words_a)
+            print("self.up4wrong_words_b", self.up4wrong_words_b)
+            print("self.up4wrong_words_a / (self.words_score + self.up4wrong_words_b)")
+            print(self.up4wrong_words_a / (self.words_score + self.up4wrong_words_b))
 
     def option_a(self):
         if __name__ == '__main__' and self.args.verbose:
-            print "you answered add"
-        original_word = raw_input("\n\nwhich word you wanna add?  ").decode(sys.stdin.encoding)
+            print("you answered add")
+        original_word = input("\n\nwhich word you wanna add?  ")
         # check if that word doesn't already exist and give the points in case of existing
         original_word_exist = self.check_if_the_word_exist(original_word)
         if not original_word_exist:
-            translation = raw_input("what is the solution for that word?  ").decode(sys.stdin.encoding)
+            translation = input("what is the solution for that word?  ")
             if translation == "q":  # quit
                 return
             self.add_new_word(new_word=[original_word, translation], new_word_points=1.0)
         else:
             translation = self.dict_of_all_words[original_word_exist][1]
-            print "\nthe word %s already exists, with the translation: %s" % (original_word, translation)
+            print("\nthe word %s already exists, with the translation: %s" % (original_word, translation))
             time.sleep(5)
 
     def option_m(self):
         if __name__ == '__main__' and self.args.verbose:
-            print "you answered modify"
-        word2modify = raw_input("\n\nwhich word you wanna modify the solution?  ")
+            print("you answered modify")
+        word2modify = input("\n\nwhich word you wanna modify the solution?  ")
         word2modify_points = self.check_if_the_word_exist(word2modify)
         if word2modify_points:
             translation = self.dict_of_all_words[word2modify_points][1]
-            print "\n\nthe word %s already exists, with the translation: %s" % (word2modify, translation)
-            translation = raw_input("\nwhat is the new solution for that word?  ").decode(sys.stdin.encoding)
+            print("\n\nthe word %s already exists, with the translation: %s" % (word2modify, translation))
+            translation = input("\nwhat is the new solution for that word?  ")
             self.dict_of_all_words[word2modify_points][1] = translation
         else:
-            print "that word don't exist, please insert a word that already exist or add new one"
+            print("that word don't exist, please insert a word that already exist or add new one")
             self.print_menu()
 
     def option_d(self):
         if __name__ == '__main__' and self.args.verbose:
-            print "you answered delete"
-        original_word = raw_input("which word you wanna delete?  ")
+            print("you answered delete")
+        original_word = input("which word you wanna delete?  ")
         self.delete_word(original_word)
 
     def option_q(self):
         if __name__ == '__main__' and self.args.verbose:
-            print "you answered quit"
+            print("you answered quit")
         sys.exit(0)
 
     def print_menu(self):
         while True:
             if __name__ == '__main__' and self.args.verbose:
-                print "while True"
+                print("while True")
             options = ["yes", "no", "add", "modify", "delete", "quit"]
             menu = "\n"
             for option in options:
                 menu += "[{}]{} ".format(option[0], option[1::])
-            print menu,
-            choice = raw_input("  ").strip().lower()
+            print(menu,)
+            choice = input("  ").strip().lower()
             if __name__ == '__main__' and self.args.verbose:
-                print "choice: ", choice
-                print "len(choice) != 1 ", len(choice) != 1
-                print "choice not in options", choice not in options
+                print("choice: ", choice)
+                print("len(choice) != 1 ", len(choice) != 1)
+                print("choice not in options", choice not in options)
             erro_msg = "\n\nI don't understand your answer, please select one of the below posiblilities"
             if len(choice) != 1 and choice not in options:
-                print erro_msg
+                print(erro_msg)
                 continue
             try:
                 if __name__ == '__main__' and self.args.verbose:
-                    print '"option_" + choice[0]', "option_" + choice[0]
+                    print('"option_" + choice[0]', "option_" + choice[0])
                 getattr(self, "option_" + choice[0])()
             except AttributeError:
-                print erro_msg
+                print(erro_msg)
                 continue
             break
 
@@ -288,23 +288,26 @@ class Run(object):
         while True:
             n = len(dictionary)
             degree = int(words_score / 100)
-            for i in xrange(degree):
+            for i in range(degree):
                 n = max(random.randrange(n) + 1, 2)
-            lower_points = sorted(dictionary)[0:n]
+            # print("dictionary", dictionary)
+            lower_points = sorted(dictionary, key=lambda x: float(x))
+            print("lower_points", lower_points)
+            lower_points = lower_points[0:n]
             word_points = random.choice(lower_points)
             if word_points != last_word_points:
                 break
         return word_points
 
         if __name__ == '__main__' and self.args.verbose:
-            print "calc_word_points"
-            print "degree: ", degree
-            print lower_points
-            print word_points
+            print("calc_word_points")
+            print("degree: ", degree)
+            print(lower_points)
+            print(word_points)
 
     def choose_a_word(self, dictionary=None, words_score=None, last_word_points=None):
         if __name__ == '__main__' and self.args.verbose:
-            print "\nchoose_a_word"
+            print("\nchoose_a_word")
 
         if not dictionary:
             dictionary = self.dict_of_all_words
@@ -319,21 +322,21 @@ class Run(object):
 
     def print_word_and_solution(self):
         if __name__ == '__main__' and self.args.verbose:
-            print "\print_word_and_solution"
+            print("\print_word_and_solution")
 
         # print "%s  (%s points)  words: %s   score: %s"\
         #     % (self.chosen_word[0], int(self.word_points),
         #         len(self.dict_of_all_words), int(self.words_score))
-        print "%s  (%s points)  words: %s"\
-            % (self.chosen_word[0], int(self.word_points),
-                len(self.dict_of_all_words))
-        raw_input()
-        print self.chosen_word[1]
+        print("%s  (%s points)  words: %s"\
+            % (self.chosen_word[0], int(float(self.word_points)),
+                len(self.dict_of_all_words)))
+        input()
+        print(self.chosen_word[1])
 
     def run(self):
         while True:
             if __name__ == '__main__' and self.args.verbose:
-                print "\n\nrun"
+                print("\n\nrun")
 
             self.word_points, self.chosen_word = self.choose_a_word()
             self.clear_screen()
@@ -342,9 +345,9 @@ class Run(object):
             self.last_word_points = self.word_points
 
             if __name__ == '__main__' and self.args.verbose:
-                print "chosen_word ", self.chosen_word
-                print "word_points ", self.word_points
-                print self.dict_of_all_words
+                print("chosen_word ", self.chosen_word)
+                print("word_points ", self.word_points)
+                print(self.dict_of_all_words)
 
             self.save_file()
             self.f.close()
