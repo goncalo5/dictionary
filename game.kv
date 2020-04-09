@@ -38,17 +38,24 @@
         orientation: "vertical"
         BoxLayout:
             orientation: "horizontal"
+            size_hint_y: 0.1
             Button:
                 text: "add word"
                 on_press:
                     print(self.text)
                     root.manager.current = "add_word_menu"
+            Label:
+                text: "words: %s" % app.number_of_words
         BoxLayout:
             orientation: "horizontal"
+            size_hint_y: 0.1
             Label:
                 text: "%s" % app.languages[0]
             Label:
                 text: "%s" % app.languages[1]
+            Label:
+                text: "Points"
+        RV:
 
 <AddWordMenu@Screen>:
     BoxLayout:
@@ -59,28 +66,34 @@
                 text: app.languages[0]
             TextInput:
                 id: language1_word
+                text: ""
         BoxLayout:
             orientation: "horizontal"
             Label:
                 text: app.languages[1]
             TextInput:
                 id: language2_word
+                text: ""
         BoxLayout:
             orientation: "horizontal"
             Button:
                 text: "Done"
                 on_press:
                     print(self.text)
+                    app.add_word(language1_word.text, language2_word.text)
                     language1_word.text = ""
                     language2_word.text = ""
-                    app.add_word(language1_word.text, language2_word.text)
             Button:
                 text: "quit"
                 on_press:
                     print(self.text)
                     root.manager.current = "edit_words_menu"
 
-
+<RV@RecycleView>:
+    ListAllWords:
+        orientation: 'vertical'
+        size_hint_y: None
+        height: self.minimum_height  # IMPORTANT!!!
 
 <Manager>:
     id: manager

@@ -30,6 +30,14 @@ class TestDictionary(unittest.TestCase):
         sol = {"en": "house", "pt": ["casa", "vivenda"], "points": settings.INIT_WORD_POINTS}
         self.assertIn(sol, game_app.words)
 
+    def test_number_of_words(self):
+        game_app = main.GameApp()
+        game_app.add_languages("en", "pt")
+        self.assertEqual(game_app.calc_number_of_words(), 0)
+        game_app.add_word("house", "casa")
+        self.assertEqual(game_app.calc_number_of_words(), 1)
+
+
 
 # class TestWizard(unittest.TestCase):
 
