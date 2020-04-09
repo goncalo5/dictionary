@@ -1,0 +1,106 @@
+#:kivy 1.10.1
+
+<MainMenu@Screen>:
+    BoxLayout:
+        orientation: "vertical"
+        Button:
+            text: "continue"
+        Button:
+            text: "new"
+            on_press: root.manager.current = "new_game_menu"
+        Button:
+            text: "edit"
+
+<NewGameMenu@Screen>:
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "horizontal"
+            Label:
+                text: "First Language"
+            TextInput:
+                id: first_language
+        BoxLayout:
+            orientation: "horizontal"
+            Label:
+                text: "Second Language"
+            TextInput:
+                id: second_language
+        Button:
+            text: "Done"
+            on_press:
+                root.manager.current = "edit_words_menu"
+                print(first_language.text, second_language.text)
+                app.add_languages(first_language.text, second_language.text)
+
+<EditWordsMenu@Screen>:
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                text: "add word"
+                on_press:
+                    print(self.text)
+                    root.manager.current = "add_word_menu"
+        BoxLayout:
+            orientation: "horizontal"
+            Label:
+                text: "%s" % app.languages[0]
+            Label:
+                text: "%s" % app.languages[1]
+
+<AddWordMenu@Screen>:
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "horizontal"
+            Label:
+                text: app.languages[0]
+            TextInput:
+                id: language1_word
+        BoxLayout:
+            orientation: "horizontal"
+            Label:
+                text: app.languages[1]
+            TextInput:
+                id: language2_word
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                text: "Done"
+                on_press:
+                    print(self.text)
+                    language1_word.text = ""
+                    language2_word.text = ""
+                    app.add_word(language1_word.text, language2_word.text)
+            Button:
+                text: "quit"
+                on_press:
+                    print(self.text)
+                    root.manager.current = "edit_words_menu"
+
+
+
+<Manager>:
+    id: manager
+    main_menu: main_menu
+    new_game_menu: new_game_menu
+    edit_words_menu: edit_words_menu
+    add_word_menu: add_word_menu
+    MainMenu:
+        id: main_menu
+        name: "main_menu"
+        manager: manager
+    NewGameMenu:
+        id: new_game_menu
+        name: "new_game_menu"
+        manager: manager
+    EditWordsMenu:
+        id: edit_words_menu
+        name: "edit_words_menu"
+        manager: manager
+    AddWordMenu:
+        id: add_word_menu
+        name: "add_word_menu"
+        manager: manager
