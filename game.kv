@@ -19,6 +19,7 @@
     word_label: word_label
     word_input: word_input
     points_label: points_label
+    check_button: check_button
     BoxLayout:
         orientation: "vertical"
         Label:
@@ -31,15 +32,18 @@
         BoxLayout:
             orientation: "horizontal"
             Button:
+                id: check_button
                 text: "check"
                 on_press:
                     print(self.text)
                     app.update_word_after_check(word_label.text, word_input.text)
+                    self.disabled = True
             Button:
                 text: "next"
                 on_press:
                     print(self.text)
                     app.update_word()
+                    check_button.disabled = False
             Button:
                 text: "quit"
                 on_press: root.manager.current = "main_menu"
@@ -121,6 +125,7 @@
                     app.add_word(language1_word.text, language2_word.text)
                     language1_word.text = ""
                     language2_word.text = ""
+                    app.save_game()
             Button:
                 text: "quit"
                 on_press:

@@ -1,5 +1,6 @@
 # python modules:
 import random
+import json
 # kivy modules:
 from kivy.app import App
 from kivy import properties as kp
@@ -14,6 +15,7 @@ from kivy.uix.label import Label
 import settings
 
 
+# GUI:
 class ListAllWords(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -100,15 +102,40 @@ class GameApp(App):
         print("update_word_after_check(%s, %s)" % (word1, word2))
         self.current_word = self.update_word_points(word1, word2)
         print("self.current_word: %s" % self.current_word)
-        self.manager.game_menu.points_label.text = str(self.current_word["points"])
+        game_menu = self.manager.game_menu
+        game_menu.points_label.text = str(self.current_word["points"])
+        self.save_game()
 
     def update_word(self):
         print("update_word()", self.current_word)
         self.current_word = self.pick_random_word()
-        self.manager.game_menu.points_label.text = str(self.current_word["points"])
-        self.manager.game_menu.word_label.text = self.current_word[self.languages[0]]
-        self.manager.game_menu.word_input.text = ""
+        game_menu = self.manager.game_menu
+        game_menu.points_label.text = str(self.current_word["points"])
+        game_menu.word_label.text = self.current_word[self.languages[0]]
+        game_menu.word_input.text = ""
+
+    # load / save game:
+    def load_game(self):
+        try:
+            with open(settings.SAVES_FILE) as f:
+                data = json.load(f)
+                self.points = data["points"]
+                self.languages = data["languages"]
+                self.words = data["words"]
+        except FileNotFoundError:
+            pass
+
+    def save_game(self):
+        with open(settings.SAVES_FILE, "w") as f:
+            data = {
+                "points": self.points,
+                "languages": self.languages,
+                "words": self.words
+            }
+            json.dump(data, f, indent=4) 
 
 
 if __name__ == "__main__":
-    GameApp().run()
+    game_app = GameApp()
+    game_app.load_game()
+    game_app.run()

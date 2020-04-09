@@ -4,3 +4,4 @@ POINTS = {
     "gain": 2,
     "lose": 2
 }
+SAVES_FILE = "dictionary.json"
