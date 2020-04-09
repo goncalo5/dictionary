@@ -13,7 +13,11 @@
             on_press:
                 root.manager.current = "new_game_menu"
         Button:
-            text: "edit"
+            text: "Edit"
+            on_press:
+                print(self.text)
+                root.manager.current = "edit_words_menu"
+                root.manager.edit_words_menu.list_of_words.update_words()
 
 <GameMenu@Screen>:
     word_label: word_label
@@ -71,6 +75,7 @@
                 app.add_languages(first_language.text, second_language.text)
 
 <EditWordsMenu@Screen>:
+    list_of_words: list_of_words
     BoxLayout:
         orientation: "vertical"
         BoxLayout:
@@ -97,7 +102,12 @@
                 text: "%s" % app.languages[1]
             Label:
                 text: "Points"
-        RV:
+        RecycleView:
+            ListAllWords:
+                id: list_of_words
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height  # IMPORTANT!!!
 
 <AddWordMenu@Screen>:
     BoxLayout:
@@ -131,12 +141,6 @@
                 on_press:
                     print(self.text)
                     root.manager.current = "edit_words_menu"
-
-<RV@RecycleView>:
-    ListAllWords:
-        orientation: 'vertical'
-        size_hint_y: None
-        height: self.minimum_height  # IMPORTANT!!!
 
 <Manager>:
     id: manager

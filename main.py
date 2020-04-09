@@ -27,6 +27,7 @@ class ListAllWords(BoxLayout):
         self.app.bind(words=self.update_words)
 
     def update_words(self, *args):
+        print("update_words()", args)
         self.clear_widgets()
         languages = self.app.languages
         for word in self.app.words:
