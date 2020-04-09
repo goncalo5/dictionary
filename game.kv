@@ -5,11 +5,44 @@
         orientation: "vertical"
         Button:
             text: "continue"
+            on_press:
+                app.update_word()
+                root.manager.current = "game_menu"
         Button:
             text: "new"
-            on_press: root.manager.current = "new_game_menu"
+            on_press:
+                root.manager.current = "new_game_menu"
         Button:
             text: "edit"
+
+<GameMenu@Screen>:
+    word_label: word_label
+    word_input: word_input
+    points_label: points_label
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            id: points_label
+        Label:
+            id: word_label
+        TextInput:
+            text: ""
+            id: word_input
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                text: "check"
+                on_press:
+                    print(self.text)
+                    app.update_word_after_check(word_label.text, word_input.text)
+            Button:
+                text: "next"
+                on_press:
+                    print(self.text)
+                    app.update_word()
+            Button:
+                text: "quit"
+                on_press: root.manager.current = "main_menu"
 
 <NewGameMenu@Screen>:
     BoxLayout:
@@ -46,6 +79,11 @@
                     root.manager.current = "add_word_menu"
             Label:
                 text: "words: %s" % app.number_of_words
+            Button:
+                text: "quit"
+                on_press:
+                    print(self.text)
+                    root.manager.current = "main_menu"
         BoxLayout:
             orientation: "horizontal"
             size_hint_y: 0.1
@@ -101,6 +139,7 @@
     new_game_menu: new_game_menu
     edit_words_menu: edit_words_menu
     add_word_menu: add_word_menu
+    game_menu: game_menu
     MainMenu:
         id: main_menu
         name: "main_menu"
@@ -116,4 +155,8 @@
     AddWordMenu:
         id: add_word_menu
         name: "add_word_menu"
+        manager: manager
+    GameMenu:
+        id: game_menu
+        name: "game_menu"
         manager: manager

@@ -3,7 +3,7 @@ import unittest
 import dictionary
 import actions
 import main
-import settings
+from settings import *
 
 
 class TestDictionary(unittest.TestCase):
@@ -23,11 +23,11 @@ class TestDictionary(unittest.TestCase):
         game_app.add_languages("en", "pt")
 
         game_app.add_word("house", "casa")
-        sol = {"en": "house", "pt": "casa", "points": settings.INIT_WORD_POINTS}
+        sol = {"en": "house", "pt": "casa", "points": INIT_WORD_POINTS}
         self.assertIn(sol, game_app.words)
 
         game_app.add_word("house", ["casa", "vivenda"])
-        sol = {"en": "house", "pt": ["casa", "vivenda"], "points": settings.INIT_WORD_POINTS}
+        sol = {"en": "house", "pt": ["casa", "vivenda"], "points": INIT_WORD_POINTS}
         self.assertIn(sol, game_app.words)
 
     def test_number_of_words(self):
@@ -36,6 +36,27 @@ class TestDictionary(unittest.TestCase):
         self.assertEqual(game_app.calc_number_of_words(), 0)
         game_app.add_word("house", "casa")
         self.assertEqual(game_app.calc_number_of_words(), 1)
+
+    def test_pick_random_word(self):
+        game_app = main.GameApp()
+        game_app.add_languages("en", "pt")
+        game_app.add_word("house", "casa")
+        self.assertEqual(game_app.pick_random_word("en", "pt"), {"en": "house", "pt": "casa", "points": 1})
+        self.assertEqual(game_app.pick_random_word("pt", "en"), {"pt": "casa", "en": "house", "points": 1})
+        with self.assertRaises(Exception):
+            game_app.pick_random_word("pt", "en1")
+        self.assertEqual(game_app.pick_random_word(), {"en": "house", "pt": "casa", "points": 1})
+
+    def test_update_word_points(self):
+        print("\ntest_update_word_points()")
+        game_app = main.GameApp()
+        game_app.add_languages("en", "pt")
+        game_app.add_word("tree", "árvore")
+        sol = {"en": "tree", "pt": "árvore", "points": INIT_WORD_POINTS * POINTS["gain"]}
+        self.assertEqual(game_app.update_word_points("tree", "árvore"), sol)
+        game_app.add_word("house", ["casa", "vivenda"])
+        sol = {"en": "house", "pt": ["casa", "vivenda"], "points": INIT_WORD_POINTS * POINTS["gain"]}
+        self.assertEqual(game_app.update_word_points("house", "casa"), sol)
 
 
 

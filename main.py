@@ -1,3 +1,5 @@
+# python modules:
+import random
 # kivy modules:
 from kivy.app import App
 from kivy import properties as kp
@@ -48,6 +50,7 @@ class GameApp(App):
     languages = kp.ListProperty(["", ""])
     words = kp.ListProperty()
     number_of_words = kp.NumericProperty()
+    current_word = kp.DictProperty()
 
     def build(self):
         self.manager = Manager()
@@ -70,6 +73,41 @@ class GameApp(App):
         # print("number_of_words()", args)
         self.number_of_words = len(self.words)
         return self.number_of_words
+
+    def pick_random_word(self, lang1="", lang2=""):
+        print("pick_random_word(%s, %s)" % (lang1, lang2))
+        if not lang1:
+            lang1 = self.languages[0]
+        if not lang2:
+            lang2 = self.languages[1]
+        if lang1 not in self.languages or lang2 not in self.languages or lang1 == lang2:
+            raise Exception("please insert a valid languages not: %s and %s" % (lang1, lang2))
+        return random.choice(self.words)
+
+    def update_word_points(self, word1, word2):
+        print("update_word_points(%s, %s)" % (word1, word2))
+        for word in self.words:
+            if word[self.languages[0]] == word1:
+                if word[self.languages[1]] == word2 or word2 in word[self.languages[1]]:
+                    word["points"] *= settings.POINTS["gain"]
+                else:
+                    word["points"] /= settings.POINTS["lose"]
+                print("word: %s" % word)
+                return word
+
+    # GUI:
+    def update_word_after_check(self, word1, word2):
+        print("update_word_after_check(%s, %s)" % (word1, word2))
+        self.current_word = self.update_word_points(word1, word2)
+        print("self.current_word: %s" % self.current_word)
+        self.manager.game_menu.points_label.text = str(self.current_word["points"])
+
+    def update_word(self):
+        print("update_word()", self.current_word)
+        self.current_word = self.pick_random_word()
+        self.manager.game_menu.points_label.text = str(self.current_word["points"])
+        self.manager.game_menu.word_label.text = self.current_word[self.languages[0]]
+        self.manager.game_menu.word_input.text = ""
 
 
 if __name__ == "__main__":

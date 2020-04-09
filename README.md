@@ -39,7 +39,7 @@ Actions:  # functions using game obj/dict
 
     update_word_points:
         ex:
-            update_word_points({pt: casa, en: house})
+            update_word_points(casa, house)
                 -> {word: [{en: house, pt: [casa, vivenda], pts: 2}, ...]}
             update_word_points({pt: casa, en: hose})
                 -> {word: [{en: house, pt: [casa, vivenda], pts: 0.5}, ...]}
