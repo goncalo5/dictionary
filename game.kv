@@ -96,12 +96,27 @@
         BoxLayout:
             orientation: "horizontal"
             size_hint_y: 0.1
-            Label:
+            Button:
                 text: "%s" % app.languages[0]
-            Label:
+                reverse: True
+                on_press:
+                    print(self.text, self.reverse)
+                    app.order_by(app.languages[0], self.reverse)
+                    self.reverse = not self.reverse
+            Button:
                 text: "%s" % app.languages[1]
-            Label:
+                reverse: True
+                on_press:
+                    print(self.text, self.reverse)
+                    app.order_by(app.languages[1], self.reverse)
+                    self.reverse = not self.reverse
+            Button:
                 text: "Points"
+                reverse: True
+                on_press:
+                    print(self.text, self.reverse)
+                    app.order_by("points", self.reverse)
+                    self.reverse = not self.reverse
             Label
         RecycleView:
             ListAllWords:

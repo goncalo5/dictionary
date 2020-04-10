@@ -136,7 +136,8 @@ class GameApp(App):
         print("order_by(%s, %s)" % (what, reverse))
         print(self.words)
         if what in ["points"]:
-            self.words = sorted(self.words, key=lambda x: x[what], reverse=reverse)
+            self.words =\
+                sorted(self.words, key=lambda x: float(x[what]), reverse=reverse)
         else:
             self.words =\
                 sorted(self.words, key=lambda x: strip_accents(x[what]), reverse=reverse)
