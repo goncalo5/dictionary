@@ -1,6 +1,7 @@
 # python modules:
 import random
 import json
+import unicodedata
 # kivy modules:
 from kivy.app import App
 from kivy import properties as kp
@@ -14,6 +15,11 @@ from kivy.uix.label import Label
 # mine:
 import settings
 
+
+# functions:
+def strip_accents(s):
+   return ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
 
 # GUI:
 class ListAllWords(BoxLayout):
@@ -74,7 +80,7 @@ class GameApp(App):
         self.languages = [lang1, lang2]
 
     def add_word(self, word1, word2):
-        print("add_word(%s, %s)" % (word1, word2))
+        # print("add_word(%s, %s)" % (word1, word2))
         new_word = {
             self.languages[0]: word1,
             self.languages[1]: word2
@@ -83,7 +89,7 @@ class GameApp(App):
         self.words.append(new_word)
 
     def delete_word(self, word_to_delete="", language=""):
-        print("delete_word()", word_to_delete, language)
+        # print("delete_word()", word_to_delete, language)
         # word_to_delete could be a string or a dict/obj
         if not language:
             language = self.languages[0]
@@ -100,7 +106,7 @@ class GameApp(App):
         return self.number_of_words
 
     def pick_random_word(self, lang1="", lang2=""):
-        print("pick_random_word(%s, %s)" % (lang1, lang2))
+        # print("pick_random_word(%s, %s)" % (lang1, lang2))
         if not lang1:
             lang1 = self.languages[0]
         if not lang2:
@@ -110,7 +116,7 @@ class GameApp(App):
         return random.choice(self.words)
 
     def update_word_points(self, word1, word2):
-        print("update_word_points(%s, %s)" % (word1, word2))
+        # print("update_word_points(%s, %s)" % (word1, word2))
         for word in self.words:
             if word[self.languages[0]] == word1:
                 correct_word = word[self.languages[1]]
@@ -125,6 +131,17 @@ class GameApp(App):
                     word["points"] /= settings.POINTS["lose"]
                 # print("word: %s" % word)
                 return word
+
+    def order_by(self, what, reverse=False):
+        print("order_by(%s, %s)" % (what, reverse))
+        print(self.words)
+        if what in ["points"]:
+            self.words = sorted(self.words, key=lambda x: x[what], reverse=reverse)
+        else:
+            self.words =\
+                sorted(self.words, key=lambda x: strip_accents(x[what]), reverse=reverse)
+        print(self.words)
+        return self.words
 
     # GUI:
     def update_word_after_check(self, word1, word2):

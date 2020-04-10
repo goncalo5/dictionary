@@ -70,6 +70,7 @@ class TestDictionary(unittest.TestCase):
         self.assertEqual(game_app.calc_number_of_words(), 1)
 
     def test_pick_random_word(self):
+        print("\ntest_pick_random_word()")
         game_app = main.GameApp()
         game_app.add_languages("en", "pt")
         game_app.add_word("house", "casa")
@@ -97,6 +98,19 @@ class TestDictionary(unittest.TestCase):
         sol = {"en": "brew", "pt": "preparar", "points": INIT_WORD_POINTS / POINTS["lose"]}
         self.assertEqual(game_app.update_word_points("brew", ""), sol)
 
+    def test_order_by(self):
+        print("\ntest_order_by()")
+        game_app = main.GameApp()
+        game_app.add_languages("en", "pt")
+        game_app.add_word("tree", "árvore")
+        game_app.add_word("house", "casa")
+        game_app.update_word_points("house", "casa")
+        self.tree_word["points"] = INIT_WORD_POINTS
+        self.house_word["points"] = INIT_WORD_POINTS * POINTS["gain"]
+        self.assertEqual(game_app.order_by("points"), [self.tree_word, self.house_word])
+        self.assertEqual(game_app.order_by("points", True), [self.house_word, self.tree_word])
+        self.assertEqual(game_app.order_by("en"), [self.house_word, self.tree_word])
+        self.assertEqual(game_app.order_by("pt"), [self.tree_word, self.house_word])
 
 
 # class TestWizard(unittest.TestCase):
