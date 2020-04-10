@@ -20,9 +20,11 @@ Actions:  # functions using game obj/dict
     edit_word:
 
     delete_word:
-        input: {lang: word}
+        input: word or word_dict
         ex:
-            {en: house} -> {word: [ ...]}
+            delete_word(house) -> {word: [ ...]}
+            delete_word(casa) -> {word: [ ...]}
+            delete_word({en: house, pt: casa, points: 1}) -> {word: [ ...]}
 
     pick_random_word:
         ex:
@@ -41,7 +43,9 @@ Actions:  # functions using game obj/dict
         ex:
             update_word_points(casa, house)
                 -> {word: [{en: house, pt: [casa, vivenda], pts: 2}, ...]}
-            update_word_points({pt: casa, en: hose})
+            update_word_points(casa, hose})
+                -> {word: [{en: house, pt: [casa, vivenda], pts: 0.5}, ...]}
+            update_word_points(casa, ""})
                 -> {word: [{en: house, pt: [casa, vivenda], pts: 0.5}, ...]}
 
     update_points:

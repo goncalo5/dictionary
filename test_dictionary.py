@@ -89,6 +89,13 @@ class TestDictionary(unittest.TestCase):
         game_app.add_word("house", ["casa", "vivenda"])
         sol = {"en": "house", "pt": ["casa", "vivenda"], "points": INIT_WORD_POINTS * POINTS["gain"]}
         self.assertEqual(game_app.update_word_points("house", "casa"), sol)
+        sol["points"] /= POINTS["lose"]
+        self.assertEqual(game_app.update_word_points("house", "casaa"), sol)
+        sol["points"] /= POINTS["lose"]
+        self.assertEqual(game_app.update_word_points("house", ""), sol)
+        game_app.add_word("brew", "preparar")
+        sol = {"en": "brew", "pt": "preparar", "points": INIT_WORD_POINTS / POINTS["lose"]}
+        self.assertEqual(game_app.update_word_points("brew", ""), sol)
 
 
 

@@ -113,20 +113,28 @@ class GameApp(App):
         print("update_word_points(%s, %s)" % (word1, word2))
         for word in self.words:
             if word[self.languages[0]] == word1:
-                if word[self.languages[1]] == word2 or word2 in word[self.languages[1]]:
+                correct_word = word[self.languages[1]]
+                if isinstance(correct_word, str):
+                    correct_word = [correct_word]
+                # print("correct_word: %s" % correct_word)
+                if word2 and word2 in correct_word:
+                    # print("gain", correct_word == word2, word2 in correct_word)
                     word["points"] *= settings.POINTS["gain"]
                 else:
+                    # print("lose", correct_word)
                     word["points"] /= settings.POINTS["lose"]
-                print("word: %s" % word)
+                # print("word: %s" % word)
                 return word
 
     # GUI:
     def update_word_after_check(self, word1, word2):
         print("update_word_after_check(%s, %s)" % (word1, word2))
+        print("self.current_word: %s" % self.current_word)
         self.current_word = self.update_word_points(word1, word2)
         print("self.current_word: %s" % self.current_word)
         game_menu = self.manager.game_menu
         game_menu.points_label.text = str(self.current_word["points"])
+        game_menu.word_input.text = str(self.current_word[self.languages[1]])
         self.save_game()
 
     def update_word(self):

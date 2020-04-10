@@ -37,7 +37,7 @@
             orientation: "horizontal"
             Button:
                 id: check_button
-                text: "check"
+                text: "Check"
                 on_press:
                     print(self.text)
                     app.update_word_after_check(word_label.text, word_input.text)
@@ -102,6 +102,7 @@
                 text: "%s" % app.languages[1]
             Label:
                 text: "Points"
+            Label
         RecycleView:
             ListAllWords:
                 id: list_of_words
