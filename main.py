@@ -36,12 +36,22 @@ class ListAllWords(BoxLayout):
             word1_label = Label(text=str(word[languages[0]]))
             word2_label = Label(text=str(word[languages[1]]))
             points_label = Label(text=str(word["points"]))
+            delete_button = Button(text="delete")
+            delete_button.word = word
+            delete_button.bind(on_release=self.delete_word)
 
             box.add_widget(word1_label)
             box.add_widget(word2_label)
             box.add_widget(points_label)
+            box.add_widget(delete_button)
 
             self.add_widget(box)
+
+    def delete_word(self, *args):
+        print("delete_word()", args, args[0].word)
+        word = args[0].word
+        self.app.delete_word(word)
+        self.app.save_game()
 
 
 class Manager(ScreenManager):
@@ -71,6 +81,18 @@ class GameApp(App):
         }
         new_word["points"] = settings.INIT_WORD_POINTS
         self.words.append(new_word)
+
+    def delete_word(self, word_to_delete="", language=""):
+        print("delete_word()", word_to_delete, language)
+        # word_to_delete could be a string or a dict/obj
+        if not language:
+            language = self.languages[0]
+        if not isinstance(word_to_delete, str):
+            word_to_delete = word_to_delete[language]
+        for word in self.words:
+            if word[language] == word_to_delete:
+                self.words.remove(word)
+                return
 
     def calc_number_of_words(self, *args):
         # print("number_of_words()", args)

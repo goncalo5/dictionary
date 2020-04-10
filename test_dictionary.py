@@ -12,6 +12,16 @@ class TestDictionary(unittest.TestCase):
         self.words = {
             "words": []
         }
+        self.house_word = {
+            "en": "house",
+            "pt": "casa",
+            "points": 1
+        }
+        self.tree_word = {
+            "en": "tree",
+            "pt": "árvore",
+            "points": 1
+        }
 
     def test_add_languages(self):
         game_app = main.GameApp()
@@ -30,7 +40,29 @@ class TestDictionary(unittest.TestCase):
         sol = {"en": "house", "pt": ["casa", "vivenda"], "points": INIT_WORD_POINTS}
         self.assertIn(sol, game_app.words)
 
+    def test_delete_word(self):
+        print("\ntest_delete_word()")
+        game_app = main.GameApp()
+        game_app.add_languages("en", "pt")
+        game_app.add_word("house", "casa")
+        game_app.delete_word("house", "en")
+        self.assertEqual([], game_app.words)
+        game_app.add_word("house", "casa")
+        game_app.add_word("tree", "árvore")
+        game_app.delete_word("tree", "en")
+        self.assertEqual([self.house_word], game_app.words)
+        game_app.delete_word(self.house_word)
+        self.assertEqual([], game_app.words)
+        game_app.add_word("house", "casa")
+        game_app.delete_word("house")
+        self.assertEqual([], game_app.words)
+        game_app.add_word("house", "casa")
+        game_app.delete_word("tree")
+        self.assertEqual([self.house_word], game_app.words)
+
+
     def test_number_of_words(self):
+        print()
         game_app = main.GameApp()
         game_app.add_languages("en", "pt")
         self.assertEqual(game_app.calc_number_of_words(), 0)
