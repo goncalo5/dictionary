@@ -35,8 +35,8 @@ class TestDictionary(unittest.TestCase):
         sol = {"en": "house", "pt": "casa", "points": POINTS["word"]["init"]}
         self.assertIn(sol, game_app.words)
 
-        game_app.add_word("house", ["casa", "vivenda"])
-        sol = {"en": "house", "pt": ["casa", "vivenda"], "points": POINTS["word"]["init"]}
+        game_app.add_word("house", "casa, vivenda")
+        sol = {"en": "house", "pt": "casa, vivenda", "points": POINTS["word"]["init"]}
         self.assertIn(sol, game_app.words)
 
     def test_delete_word(self):
@@ -83,7 +83,7 @@ class TestDictionary(unittest.TestCase):
         print("\ntest_check_solution()")
         game_app = main.GameApp()
         game_app.add_languages("en", "pt")
-        game_app.add_word("house", ["casa", "vivenda"])
+        game_app.add_word("house", "casa, vivenda")
         self.assertEqual(game_app.check_solution("house", "casa"), (True, game_app.words[0]))
         self.assertEqual(game_app.check_solution("house", "Casa"), (True, game_app.words[0]))
         self.assertEqual(game_app.check_solution("house", "CASA"), (True, game_app.words[0]))
@@ -99,8 +99,8 @@ class TestDictionary(unittest.TestCase):
         decreased_rate = POINTS["word"]["decreased_rate"]
         sol = {"en": "tree", "pt": "árvore", "points": POINTS["word"]["init"] * increase_rate}
         self.assertEqual(game_app.update_word_points("tree", "árvore"), sol)
-        game_app.add_word("house", ["casa", "vivenda"])
-        sol = {"en": "house", "pt": ["casa", "vivenda"], "points": POINTS["word"]["init"] * increase_rate}
+        game_app.add_word("house", "casa, vivenda")
+        sol = {"en": "house", "pt": "casa, vivenda", "points": POINTS["word"]["init"] * increase_rate}
         self.assertEqual(game_app.update_word_points("house", "casa"), sol)
         sol["points"] /= decreased_rate
         self.assertEqual(game_app.update_word_points("house", "casaa"), sol)

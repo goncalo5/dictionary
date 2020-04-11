@@ -15,8 +15,9 @@ Actions:  # functions using game obj/dict
             {lang1: word, lang2: translation}
             {lang1: word, lang2: [translation1, translation2]}
         ex:
-            {en: house, pt: casa} -> {word: [{en: house, pt: casa, pts: 1}, ...]}
-            {en: house, pt: [casa, vivenda]} -> {word: [{en: house, pt: [casa, vivenda], pts: 1}, ...]}
+            add_word("house", "casa") -> {word: [{en: house, pt: casa, pts: 1}, ...]}
+            add_word("house", "casa, vivenda") -> {word: [{en: "house", pt: "casa, vivenda", pts: 1}, ...]}
+            add_word("rabbit, bunny", "coelho") -> {word: [{en: "rabiit, bunny", pt: "coelho", pts: 1}, ...]}
     edit_word:
 
     delete_word:
@@ -42,11 +43,11 @@ Actions:  # functions using game obj/dict
     update_word_points:
         ex:
             update_word_points(casa, house)
-                -> {words: [{en: house, pt: [casa, vivenda], pts: 2}, ...]}
+                -> {words: [{en: house, pt: casa, pts: 2}, ...]}
             update_word_points(casa, hose})
-                -> {words: [{en: house, pt: [casa, vivenda], pts: 0.5}, ...]}
+                -> {words: [{en: house, pt: casa, pts: 0.5}, ...]}
             update_word_points(casa, ""})
-                -> {words: [{en: house, pt: [casa, vivenda], pts: 0.5}, ...]}
+                -> {words: [{en: house, pt: casa, pts: 0.5}, ...]}
 
     update_points:
         ex:

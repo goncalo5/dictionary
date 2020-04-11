@@ -163,8 +163,7 @@ class GameApp(App):
             print("word", word)
             if word[self.languages[0]] == word1:
                 correct_word = word[self.languages[1]]
-                if isinstance(correct_word, str):
-                    correct_word = [correct_word]
+                correct_word = correct_word.split(", ")
                 # print("correct_word: %s" % correct_word)
                 correct_word = [word.lower() for word in correct_word]
                 if word2 and word2.lower() in correct_word:
