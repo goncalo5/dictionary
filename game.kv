@@ -99,11 +99,6 @@
                     root.manager.current = "add_word_menu"
             Label:
                 text: "words: %s" % app.number_of_words
-            Button:
-                text: "quit"
-                on_press:
-                    print(self.text)
-                    root.manager.current = "main_menu"
         BoxLayout:
             orientation: "horizontal"
             size_hint_y: 0.1
@@ -163,11 +158,6 @@
                     language1_word.text = ""
                     language2_word.text = ""
                     app.save_game()
-            Button:
-                text: "quit"
-                on_press:
-                    print(self.text)
-                    root.manager.current = "edit_words_menu"
 
 <Manager@ScreenManager>:
     id: manager

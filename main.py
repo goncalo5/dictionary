@@ -172,7 +172,8 @@ class GameApp(App):
         previous_screen = self.meta_game.manager.current_screen.previous_screen
         if previous_screen:
             self.meta_game.manager.current = previous_screen
-        exit()
+        else:
+            exit()
             
 
 
