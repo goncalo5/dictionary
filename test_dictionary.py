@@ -85,17 +85,19 @@ class TestDictionary(unittest.TestCase):
         game_app = main.GameApp()
         game_app.add_languages("en", "pt")
         game_app.add_word("tree", "árvore")
-        sol = {"en": "tree", "pt": "árvore", "points": INIT_WORD_POINTS * POINTS["gain"]}
+        increase_rate = POINTS["word"]["increase_rate"]
+        decreased_rate = POINTS["word"]["decreased_rate"]
+        sol = {"en": "tree", "pt": "árvore", "points": INIT_WORD_POINTS * increase_rate}
         self.assertEqual(game_app.update_word_points("tree", "árvore"), sol)
         game_app.add_word("house", ["casa", "vivenda"])
-        sol = {"en": "house", "pt": ["casa", "vivenda"], "points": INIT_WORD_POINTS * POINTS["gain"]}
+        sol = {"en": "house", "pt": ["casa", "vivenda"], "points": INIT_WORD_POINTS * increase_rate}
         self.assertEqual(game_app.update_word_points("house", "casa"), sol)
-        sol["points"] /= POINTS["lose"]
+        sol["points"] /= decreased_rate
         self.assertEqual(game_app.update_word_points("house", "casaa"), sol)
-        sol["points"] /= POINTS["lose"]
+        sol["points"] /= decreased_rate
         self.assertEqual(game_app.update_word_points("house", ""), sol)
         game_app.add_word("brew", "preparar")
-        sol = {"en": "brew", "pt": "preparar", "points": INIT_WORD_POINTS / POINTS["lose"]}
+        sol = {"en": "brew", "pt": "preparar", "points": INIT_WORD_POINTS / decreased_rate}
         self.assertEqual(game_app.update_word_points("brew", ""), sol)
 
     def test_order_by(self):
@@ -106,7 +108,7 @@ class TestDictionary(unittest.TestCase):
         game_app.add_word("house", "casa")
         game_app.update_word_points("house", "casa")
         self.tree_word["points"] = INIT_WORD_POINTS
-        self.house_word["points"] = INIT_WORD_POINTS * POINTS["gain"]
+        self.house_word["points"] = INIT_WORD_POINTS * POINTS["word"]["increase_rate"]
         self.assertEqual(game_app.order_by("points"), [self.tree_word, self.house_word])
         self.assertEqual(game_app.order_by("points", True), [self.house_word, self.tree_word])
         self.assertEqual(game_app.order_by("en"), [self.house_word, self.tree_word])

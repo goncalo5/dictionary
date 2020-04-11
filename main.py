@@ -117,6 +117,8 @@ class GameApp(App):
 
     def update_word_points(self, word1, word2):
         # print("update_word_points(%s, %s)" % (word1, word2))
+        increase_rate = settings.POINTS["word"]["increase_rate"]
+        decreased_rate = settings.POINTS["word"]["decreased_rate"]
         for word in self.words:
             if word[self.languages[0]] == word1:
                 correct_word = word[self.languages[1]]
@@ -125,31 +127,31 @@ class GameApp(App):
                 # print("correct_word: %s" % correct_word)
                 if word2 and word2 in correct_word:
                     # print("gain", correct_word == word2, word2 in correct_word)
-                    word["points"] *= settings.POINTS["gain"]
+                    word["points"] *= increase_rate
                 else:
                     # print("lose", correct_word)
-                    word["points"] /= settings.POINTS["lose"]
+                    word["points"] /= decreased_rate
                 # print("word: %s" % word)
                 return word
 
     def order_by(self, what, reverse=False):
         print("order_by(%s, %s)" % (what, reverse))
-        print(self.words)
+        # print(self.words)
         if what in ["points"]:
             self.words =\
                 sorted(self.words, key=lambda x: float(x[what]), reverse=reverse)
         else:
             self.words =\
                 sorted(self.words, key=lambda x: strip_accents(x[what]), reverse=reverse)
-        print(self.words)
+        # print(self.words)
         return self.words
 
     # GUI:
     def update_word_after_check(self, word1, word2):
         print("update_word_after_check(%s, %s)" % (word1, word2))
-        print("self.current_word: %s" % self.current_word)
+        # print("self.current_word: %s" % self.current_word)
         self.current_word = self.update_word_points(word1, word2)
-        print("self.current_word: %s" % self.current_word)
+        # print("self.current_word: %s" % self.current_word)
         game_menu = self.manager.game_menu
         game_menu.points_label.text = str(self.current_word["points"])
         game_menu.word_input.text = str(self.current_word[self.languages[1]])
