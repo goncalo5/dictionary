@@ -115,7 +115,8 @@ class GameApp(App):
             lang2 = self.languages[1]
         if lang1 not in self.languages or lang2 not in self.languages or lang1 == lang2:
             raise Exception("please insert a valid languages not: %s and %s" % (lang1, lang2))
-
+        if len(self.words) == 1:
+            return self.words[0]
         # calc n_of_words_to_choose_from
         # it depends of the points, more points -> more degree -> more difficult
         # if the degree is 0 all the words have the same prob to appear
