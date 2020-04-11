@@ -1,6 +1,3 @@
-INIT_POINTS = 500
-INIT_WORD_POINTS = 1
-
 POINTS = {
     "game": {
 

@@ -60,21 +60,21 @@ class ListAllWords(BoxLayout):
         self.app.save_game()
 
 
-class Manager(ScreenManager):
+class MetaGame(BoxLayout):
     pass
 
 
 class GameApp(App):
-    points = kp.NumericProperty(settings.INIT_POINTS)
+    points = kp.NumericProperty(settings.POINTS["game"]["init"])
     languages = kp.ListProperty(["", ""])
     words = kp.ListProperty()
     number_of_words = kp.NumericProperty()
     current_word = kp.DictProperty()
 
     def build(self):
-        self.manager = Manager()
+        self.meta_game = MetaGame()
         self.bind(words=self.calc_number_of_words)
-        return self.manager
+        return self.meta_game
 
     def add_languages(self, lang1, lang2):
         self.languages = [lang1, lang2]
@@ -85,7 +85,7 @@ class GameApp(App):
             self.languages[0]: word1,
             self.languages[1]: word2
         }
-        new_word["points"] = settings.INIT_WORD_POINTS
+        new_word["points"] = settings.POINTS["word"]["init"]
         self.words.append(new_word)
 
     def delete_word(self, word_to_delete="", language=""):
@@ -152,7 +152,7 @@ class GameApp(App):
         # print("self.current_word: %s" % self.current_word)
         self.current_word = self.update_word_points(word1, word2)
         # print("self.current_word: %s" % self.current_word)
-        game_menu = self.manager.game_menu
+        game_menu = self.meta_game.manager.game_menu
         game_menu.points_label.text = str(self.current_word["points"])
         game_menu.word_input.text = str(self.current_word[self.languages[1]])
         self.save_game()
@@ -160,10 +160,21 @@ class GameApp(App):
     def update_word(self):
         print("update_word()", self.current_word)
         self.current_word = self.pick_random_word()
-        game_menu = self.manager.game_menu
+        game_menu = self.meta_game.manager.game_menu
         game_menu.points_label.text = str(self.current_word["points"])
         game_menu.word_label.text = self.current_word[self.languages[0]]
         game_menu.word_input.text = ""
+
+    def quit(self):
+        print("quit()")
+        print(self.meta_game.manager.current)
+        print(self.meta_game.manager.current_screen.previous_screen)
+        previous_screen = self.meta_game.manager.current_screen.previous_screen
+        if previous_screen:
+            self.meta_game.manager.current = previous_screen
+        exit()
+            
+
 
     # load / save game:
     def load_game(self):

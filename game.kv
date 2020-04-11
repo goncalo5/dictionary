@@ -1,5 +1,16 @@
 #:kivy 1.10.1
 
+<Header@BoxLayout>:
+    orientation: "horizontal"
+    Label:
+        text: "Points: %s" % app.points
+    Button:
+        text: "Quit"
+        on_press:
+            print(self.text)
+            app.quit()
+
+
 <MainMenu@Screen>:
     BoxLayout:
         orientation: "vertical"
@@ -158,8 +169,9 @@
                     print(self.text)
                     root.manager.current = "edit_words_menu"
 
-<Manager>:
+<Manager@ScreenManager>:
     id: manager
+    name: "manager5"
     main_menu: main_menu
     new_game_menu: new_game_menu
     edit_words_menu: edit_words_menu
@@ -169,19 +181,32 @@
         id: main_menu
         name: "main_menu"
         manager: manager
+        previous_screen: ""
     NewGameMenu:
         id: new_game_menu
         name: "new_game_menu"
         manager: manager
+        previous_screen: "main_menu"
     EditWordsMenu:
         id: edit_words_menu
         name: "edit_words_menu"
         manager: manager
+        previous_screen: "main_menu"
     AddWordMenu:
         id: add_word_menu
         name: "add_word_menu"
         manager: manager
+        previous_screen: "edit_words_menu"
     GameMenu:
         id: game_menu
         name: "game_menu"
         manager: manager
+        previous_screen: "main_menu"
+
+<MetaGame>:
+    manager: manager
+    orientation: "vertical"
+    Header:
+        size_hint_y: 0.1
+    Manager:
+        id: manager
