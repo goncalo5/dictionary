@@ -41,7 +41,7 @@ class ListAllWords(BoxLayout):
 
             word1_label = Label(text=str(word[languages[0]]))
             word2_label = Label(text=str(word[languages[1]]))
-            points_label = Label(text=str(word["points"]))
+            points_label = Label(text=str(round(word["points"], 2)))
             delete_button = Button(text="delete")
             delete_button.word = word
             delete_button.bind(on_release=self.delete_word)
@@ -70,8 +70,10 @@ class GameApp(App):
     words = kp.ListProperty()
     number_of_words = kp.NumericProperty()
     current_word = kp.DictProperty()
+    last_word = kp.DictProperty()
 
     def build(self):
+        Window.size = (400, 600)
         self.meta_game = MetaGame()
         self.bind(words=self.calc_number_of_words)
         return self.meta_game
@@ -106,14 +108,39 @@ class GameApp(App):
         return self.number_of_words
 
     def pick_random_word(self, lang1="", lang2=""):
-        # print("pick_random_word(%s, %s)" % (lang1, lang2))
+        print("\npick_random_word(%s, %s)" % (lang1, lang2))
         if not lang1:
             lang1 = self.languages[0]
         if not lang2:
             lang2 = self.languages[1]
         if lang1 not in self.languages or lang2 not in self.languages or lang1 == lang2:
             raise Exception("please insert a valid languages not: %s and %s" % (lang1, lang2))
-        return random.choice(self.words)
+
+        # calc n_of_words_to_choose_from
+        # it depends of the points, more points -> more degree -> more difficult
+        # if the degree is 0 all the words have the same prob to appear
+        # if the degree is high, will always appear the same words (with less points)
+        n_of_words_to_choose_from = self.number_of_words
+        print("n_of_words_to_choose_from: %s" % n_of_words_to_choose_from)
+        degree = int(self.points / 100)
+        print("degree: %s" % degree)
+        for _ in range(degree):
+            n_of_words_to_choose_from = max(random.randrange(n_of_words_to_choose_from) + 1, 2)
+            print("n_of_words_to_choose_from: %s" % n_of_words_to_choose_from)
+
+        self.order_by("points")
+        print("self.words:", self.words)
+        possible_words_to_choose = self.words[0: n_of_words_to_choose_from]
+        print("possible_words_to_choose", possible_words_to_choose)
+        word_choosed = random.choice(possible_words_to_choose)
+        print(word_choosed, self.last_word)
+        print(word_choosed[self.languages[0]], self.last_word.get(self.languages[0], ""))
+        if word_choosed[self.languages[0]] == self.last_word.get(self.languages[0], ""):
+            print("word_choosed == self.last_word")
+            possible_words_to_choose.remove(word_choosed)
+            word_choosed = random.choice(possible_words_to_choose)
+
+        return word_choosed
 
     def update_word_points(self, word1, word2):
         # print("update_word_points(%s, %s)" % (word1, word2))
@@ -153,15 +180,18 @@ class GameApp(App):
         self.current_word = self.update_word_points(word1, word2)
         # print("self.current_word: %s" % self.current_word)
         game_menu = self.meta_game.manager.game_menu
-        game_menu.points_label.text = str(self.current_word["points"])
+        game_menu.points_label.text = "Word Points: %s" % round(self.current_word["points"], 2)
         game_menu.word_input.text = str(self.current_word[self.languages[1]])
         self.save_game()
 
     def update_word(self):
         print("update_word()", self.current_word)
+        self.last_word = self.current_word.copy()
+        print("self.last_word:", self.last_word)
         self.current_word = self.pick_random_word()
+        print("self.current_word:", self.current_word)
         game_menu = self.meta_game.manager.game_menu
-        game_menu.points_label.text = str(self.current_word["points"])
+        game_menu.points_label.text = "Word Points: %s" % round(self.current_word["points"], 2)
         game_menu.word_label.text = self.current_word[self.languages[0]]
         game_menu.word_input.text = ""
 
@@ -185,6 +215,7 @@ class GameApp(App):
                 self.points = data["points"]
                 self.languages = data["languages"]
                 self.words = data["words"]
+                self.calc_number_of_words()
         except FileNotFoundError:
             pass
 
