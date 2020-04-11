@@ -39,16 +39,20 @@ class ListAllWords(BoxLayout):
         for word in self.app.words:
             box = BoxLayout(orientation="horizontal", size_hint_y=None, height=self.row_height)
 
-            word1_label = Label(text=str(word[languages[0]]))
-            word2_label = Label(text=str(word[languages[1]]))
-            points_label = Label(text=str(round(word["points"], 2)))
-            delete_button = Button(text="delete")
+            word1_label = Label(text=str(word[languages[0]]), size_hint_x=0.25)
+            word2_label = Label(text=str(word[languages[1]]), size_hint_x=0.25)
+            points_label = Label(text=str(round(word["points"], 2)), size_hint_x=0.25)
+            delete_button = Button(text="Delete", size_hint_x=0.125)
             delete_button.word = word
             delete_button.bind(on_release=self.delete_word)
+            edit_button = Button(text="Edit", size_hint_x=0.125)
+            edit_button.word = word
+            edit_button.bind(on_release=self.edit_word)
 
             box.add_widget(word1_label)
             box.add_widget(word2_label)
             box.add_widget(points_label)
+            box.add_widget(edit_button)
             box.add_widget(delete_button)
 
             self.add_widget(box)
@@ -58,6 +62,16 @@ class ListAllWords(BoxLayout):
         word = args[0].word
         self.app.delete_word(word)
         self.app.save_game()
+
+    def edit_word(self, *args):
+        print("edit_word()", args, args[0].word)
+        word = args[0].word
+        manager = self.app.meta_game.manager
+        manager.current = "add_word_menu"
+        manager.add_word_menu.language1_word.text = word[self.app.languages[0]]
+        manager.add_word_menu.language2_word.text = word[self.app.languages[1]]
+        self.app.words.remove(word)
+
 
 
 class MetaGame(BoxLayout):
