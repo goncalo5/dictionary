@@ -143,24 +143,46 @@ class GameApp(App):
 
         return word_choosed
 
-    def update_word_points(self, word1, word2):
-        # print("update_word_points(%s, %s)" % (word1, word2))
-        increase_rate = settings.POINTS["word"]["increase_rate"]
-        decreased_rate = settings.POINTS["word"]["decreased_rate"]
+    def check_solution(self, word1, word2):
+        print("self.languages", self.languages)
         for word in self.words:
+            print("word", word)
             if word[self.languages[0]] == word1:
                 correct_word = word[self.languages[1]]
                 if isinstance(correct_word, str):
                     correct_word = [correct_word]
                 # print("correct_word: %s" % correct_word)
-                if word2 and word2 in correct_word:
+                correct_word = [word.lower() for word in correct_word]
+                if word2 and word2.lower() in correct_word:
                     # print("gain", correct_word == word2, word2 in correct_word)
-                    word["points"] *= increase_rate
+                    return True, word
                 else:
                     # print("lose", correct_word)
-                    word["points"] /= decreased_rate
-                # print("word: %s" % word)
-                return word
+                    return False, word
+
+
+    def update_word_points(self, word1, word2):
+        # print("update_word_points(%s, %s)" % (word1, word2))
+        increase_rate = settings.POINTS["word"]["increase_rate"]
+        decreased_rate = settings.POINTS["word"]["decreased_rate"]
+        is_correct, word = self.check_solution(word1, word2)
+        if is_correct:
+            word["points"] *= increase_rate
+        else:
+            word["points"] /= decreased_rate
+        return word
+
+    def update_points(self, word1, word2):
+        print("update_points()", self.points)
+        down4right_words = settings.POINTS["game"]["down4right_words"]
+        up4wrong_words_a = settings.POINTS["game"]["up4wrong_words_a"]
+        up4wrong_words_b = settings.POINTS["game"]["up4wrong_words_b"]
+        is_correct, _ = self.check_solution(word1, word2)
+        if is_correct:
+            increment = up4wrong_words_a / ( self.points + up4wrong_words_b)
+            self.points += increment
+        else:
+            self.points -= self.points / down4right_words
 
     def order_by(self, what, reverse=False):
         print("order_by(%s, %s)" % (what, reverse))
@@ -179,6 +201,7 @@ class GameApp(App):
         print("update_word_after_check(%s, %s)" % (word1, word2))
         # print("self.current_word: %s" % self.current_word)
         self.current_word = self.update_word_points(word1, word2)
+        self.update_points(word1, word2)
         # print("self.current_word: %s" % self.current_word)
         game_menu = self.meta_game.manager.game_menu
         game_menu.points_label.text = "Word Points: %s" % round(self.current_word["points"], 2)

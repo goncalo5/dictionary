@@ -79,6 +79,17 @@ class TestDictionary(unittest.TestCase):
             game_app.pick_random_word("pt", "en1")
         self.assertEqual(game_app.pick_random_word(), {"en": "house", "pt": "casa", "points": 1})
 
+    def test_check_solution(self):
+        print("\ntest_check_solution()")
+        game_app = main.GameApp()
+        game_app.add_languages("en", "pt")
+        game_app.add_word("house", ["casa", "vivenda"])
+        self.assertEqual(game_app.check_solution("house", "casa"), (True, game_app.words[0]))
+        self.assertEqual(game_app.check_solution("house", "Casa"), (True, game_app.words[0]))
+        self.assertEqual(game_app.check_solution("house", "CASA"), (True, game_app.words[0]))
+        self.assertEqual(game_app.check_solution("house", "caasa"), (False, game_app.words[0]))
+        self.assertEqual(game_app.check_solution("house", "vivenda"), (True, game_app.words[0]))
+
     def test_update_word_points(self):
         print("\ntest_update_word_points()")
         game_app = main.GameApp()
@@ -98,6 +109,23 @@ class TestDictionary(unittest.TestCase):
         game_app.add_word("brew", "preparar")
         sol = {"en": "brew", "pt": "preparar", "points": POINTS["word"]["init"] / decreased_rate}
         self.assertEqual(game_app.update_word_points("brew", ""), sol)
+
+    def test_update_points(self):
+        print("\ntest_update_points")
+        game_app = main.GameApp()
+        game_app.add_languages("en", "pt")
+        game_app.add_word("tree", "árvore")
+        game_app.points = 500
+        down4right_words = 50
+        up4wrong_words_a = 10_000
+        up4wrong_words_b = 20
+        game_app.update_points("tree", "bad")
+        self.assertEqual(game_app.points, 500 - 500/down4right_words)
+        game_app.points = 500
+        increment = up4wrong_words_a / ( game_app.points + up4wrong_words_b)
+        game_app.update_points("tree", "árvore")
+        self.assertEqual(game_app.points, 500 + increment)
+
 
     def test_order_by(self):
         print("\ntest_order_by()")

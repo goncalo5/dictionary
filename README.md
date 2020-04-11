@@ -32,23 +32,27 @@ Actions:  # functions using game obj/dict
 
     check_solution:
         ex:
-            check_solution({pt: casa, en: house}) -> True
-            check_solution({pt: casa, en: House}) -> True
-            check_solution({pt: casa, en: HOUSE}) -> True
-            check_solution({pt: casa, en: hose}) -> False
-            check_solution({en: house, pt: casa}) -> True
-            check_solution({en: house, pt: vivenda}) -> True
+            check_solution(casa, house) -> True
+            check_solution(casa, House) -> True
+            check_solution(casa, HOUSE) -> True
+            check_solution(casa, hose) -> False
+            check_solution(house, casa) -> True
+            check_solution(house, vivenda) -> True
 
     update_word_points:
         ex:
             update_word_points(casa, house)
-                -> {word: [{en: house, pt: [casa, vivenda], pts: 2}, ...]}
+                -> {words: [{en: house, pt: [casa, vivenda], pts: 2}, ...]}
             update_word_points(casa, hose})
-                -> {word: [{en: house, pt: [casa, vivenda], pts: 0.5}, ...]}
+                -> {words: [{en: house, pt: [casa, vivenda], pts: 0.5}, ...]}
             update_word_points(casa, ""})
-                -> {word: [{en: house, pt: [casa, vivenda], pts: 0.5}, ...]}
+                -> {words: [{en: house, pt: [casa, vivenda], pts: 0.5}, ...]}
 
     update_points:
         ex:
-            update_points(points, is_correct) -> 100
-            update_points(points, is_not_correct) -> 85
+            update_points(points, is_correct) -> 550
+            update_points(points, is_not_correct) -> 450
+
+    order_by_points:
+        ex:
+            order_by_points() -> [{en: house, pt: casa, points: 1}, {... points: 2}, ...]
